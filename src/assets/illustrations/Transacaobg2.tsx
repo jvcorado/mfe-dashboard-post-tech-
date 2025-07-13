@@ -3,12 +3,11 @@ import React from "react";
 const Transacaobg2 = ({ className }: { className: string }) => (
   <svg
     width="178"
+    className={className}
     height="180"
     viewBox="0 0 178 180"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    
-    
   >
     <rect
       x="132.465"

@@ -17,12 +17,10 @@ function DashboardContent() {
     // Listener para receber token via PostMessage
     const handleMessage = (event: MessageEvent) => {
       // Verificar origem por segurança (ajuste conforme necessário)
-      if (event.origin !== "http://localhost:3001") {
+      if (event.origin !== process.env.NEXT_PUBLIC_MF_URL_AUTH) {
         console.log("Mensagem de origem não confiável:", event.origin);
         return;
       }
-
-      console.log("Mensagem recebida:", event.data);
 
       // Processar token de autenticação
       if (event.data.type === "AUTH_TOKEN" && event.data.token) {
@@ -47,7 +45,7 @@ function DashboardContent() {
             type: "REQUEST_TOKEN",
             timestamp: Date.now(),
           },
-          "http://localhost:3001"
+          process.env.NEXT_PUBLIC_MF_URL_AUTH || "*"
         );
       } else {
         console.log("Não está em um iframe, não pode solicitar token");
