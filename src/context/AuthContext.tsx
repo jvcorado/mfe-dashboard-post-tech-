@@ -97,16 +97,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           console.log("✅ Dados carregados com sucesso");
         } else {
-          console.log("❌ Token não encontrado - usuário não autenticado");
+          console.log("❌ Token não encontrado");
           setError("Token de autenticação não encontrado");
           // Garantir que o estado seja válido mesmo sem token
           setUser(null);
           setAccounts([]);
-
-          // Se não tem token, não está autenticado
-          console.log(
-            "🚫 Usuário não autenticado - será redirecionado pelo ProtectedRoute"
-          );
         }
       } catch (error) {
         console.error("❌ Erro ao inicializar autenticação:", error);
@@ -165,24 +160,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = async (shouldRedirect: boolean = true) => {
     try {
+      console.log("🚪 Iniciando logout no dashboard...");
       await AuthService.logout();
       setUser(null);
       setAccounts([]);
 
+      // COMUNICA LOGOUT PARA O MFE CORE
+      if (typeof window !== "undefined") {
+        console.log("📤 Enviando mensagem de logout para MFE Core");
+        window.parent.postMessage({ type: "AUTH_LOGOUT" }, "*");
+      }
+
       if (shouldRedirect) {
         toast.success("Logout realizado com sucesso!");
-        // Redirecionar para a página inicial do MFE core
-        window.location.href = "/";
       }
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
-      // Mesmo com erro, limpa os dados locais
+      // Mesmo com erro, limpa os dados locais e comunica
       setUser(null);
       setAccounts([]);
 
-      if (shouldRedirect) {
-        // Redirecionar mesmo em caso de erro
-        window.location.href = "/";
+      // COMUNICA LOGOUT PARA O MFE CORE MESMO COM ERRO
+      if (typeof window !== "undefined") {
+        console.log("📤 Enviando mensagem de logout para MFE Core (após erro)");
+        window.parent.postMessage({ type: "AUTH_LOGOUT" }, "*");
       }
     }
   };
@@ -224,7 +225,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const isAuthenticated = !!user && !!AuthService.getToken();
+  const isAuthenticated = !!user && AuthService.isAuthenticated();
 
   // Garantir que accounts nunca seja undefined
   const safeAccounts = accounts || [];
@@ -235,9 +236,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     "isAuthenticated:",
     isAuthenticated,
     "user:",
-    user?.name,
-    "token:",
-    AuthService.getToken() ? "EXISTE" : "NÃO EXISTE"
+    user?.name
   );
 
   return (
