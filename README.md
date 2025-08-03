@@ -13,6 +13,14 @@ O MFE Dashboard é o coração operacional do ByteBank, oferecendo uma interface
 - **Filtros Avançados**: Busca e filtros por tipo, período e valor
 - **Paginação**: Navegação eficiente em grandes volumes de dados
 
+### ENV
+
+```
+NEXT_PUBLIC_API_URL = "http://localhost:8000/api"
+NEXT_PUBLIC_MF_URL_AUTH = "http://localhost:3002"
+```
+
+
 ### Estrutura de Pastas
 ```
 src/
