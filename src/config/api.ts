@@ -1,7 +1,7 @@
 // Configurações da API
 export const API_CONFIG = {
     // URL base da API Laravel - usando rewrite do Next.js para evitar CORS
-    BASE_URL: '/api',
+    BASE_URL: '/mf',
 
     // Timeout para requisições (em milissegundos)
     TIMEOUT: 10000,
