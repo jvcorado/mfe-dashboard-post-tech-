@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Eye, EyeClosed } from "lucide-react";
@@ -13,36 +13,13 @@ import {
 } from "@/assets";
 
 import { useAuth } from "@/context/AuthContext";
-import { AccountService } from "@/services/AccountService";
 
 export default function WelcomeSection() {
   const { accounts, user } = useAuth();
-  const [balance, setBalance] = useState(0);
-  const [loading, setLoading] = useState(true);
   const [isShowBalance, setIsShowBalance] = useState(false);
 
-  useEffect(() => {
-    const fetchBalance = async () => {
-      if (!accounts) return;
-
-      try {
-        setLoading(true);
-        const { account: accountData } = await AccountService.getById(
-          accounts[0].id
-        );
-
-        console.log(accountData, "accountData");
-
-        setBalance(accountData.balance);
-      } catch (error) {
-        console.error("Erro ao buscar saldo:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBalance();
-  }, [accounts]);
+  // Usar o saldo da primeira conta diretamente do AuthContext
+  const balance = accounts && accounts.length > 0 ? accounts[0].balance : 0;
 
   const currentFormatedDate = format(new Date(), "EEEE, dd/MM/yyyy", {
     locale: ptBR,
@@ -56,10 +33,10 @@ export default function WelcomeSection() {
     : "Usuário";
 
   // Se não há conta, mostra uma mensagem padrão
-  if (!accounts || loading) {
+  if (!accounts || accounts.length === 0) {
     return (
       <div className="h-[655px] md:min-h-[402px] md:p-8 lg:h-[402px] m relative bg-[#004D61] flex flex-col items-center rounded-md pt-10 pb-10 justify-center">
-        <p className="text-white text-xl font-bold">Carregando...</p>
+        <p className="text-white text-xl font-bold">Nenhuma conta disponível</p>
       </div>
     );
   }

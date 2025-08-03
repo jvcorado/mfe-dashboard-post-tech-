@@ -2,7 +2,42 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import toast from 'react-hot-toast';
 
 // Configuração base da API
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+// Função para solicitar token do MFE core
+const requestTokenFromParent = (): Promise<string | null> => {
+    return new Promise((resolve) => {
+        console.log("🔑 Solicitando token do shell principal...");
+
+        // Envia mensagem para o MFE core solicitando o token
+        if (typeof window !== "undefined" && window.parent) {
+            window.parent.postMessage({ type: "REQUEST_TOKEN" }, "*");
+
+            // Listener temporário para receber o token
+            const handleTokenResponse = (event: MessageEvent) => {
+                console.log("📨 Resposta recebida na API:", event.data);
+
+                if (event.data && event.data.type === "TOKEN_RESPONSE") {
+                    window.removeEventListener("message", handleTokenResponse);
+                    console.log("✅ Token recebido do MFE core:", event.data.token ? "EXISTE" : "NÃO EXISTE");
+                    resolve(event.data.token || null);
+                }
+            };
+
+            window.addEventListener("message", handleTokenResponse);
+
+            // Timeout para não ficar esperando indefinidamente
+            setTimeout(() => {
+                window.removeEventListener("message", handleTokenResponse);
+                console.log("⏰ Timeout: Token não recebido na API");
+                resolve(null);
+            }, 2000);
+        } else {
+            console.log("❌ Não está em iframe, não pode solicitar token");
+            resolve(null);
+        }
+    });
+};
 
 // Criar instância do axios
 const api: AxiosInstance = axios.create({
@@ -16,8 +51,20 @@ const api: AxiosInstance = axios.create({
 
 // Interceptor para adicionar token automaticamente
 api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('auth_token');
+    async (config) => {
+        let token = localStorage.getItem('auth_token');
+
+        // Se não tem token no localStorage, tenta solicitar do MFE core
+        if (!token) {
+            console.log("🔍 Token não encontrado no localStorage, solicitando do MFE core...");
+            token = await requestTokenFromParent();
+            // Salva o token recebido no localStorage local
+            if (token) {
+                localStorage.setItem('auth_token', token);
+                console.log("💾 Token salvo no localStorage da API");
+            }
+        }
+
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }

@@ -9,8 +9,15 @@ export default function Header() {
   const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  console.log(
+    "🔍 Header render - user:",
+    user?.name,
+    "isMenuOpen:",
+    isMenuOpen
+  );
+
   return (
-    <header className="bg-[#004D61] h-24 flex items-center justify-between px-6 sticky top-0 left-0 z-50">
+    <header className="bg-[#004D61] h-24 flex items-center justify-between px-6 sticky top-0 left-0 z-50 w-full">
       <span className="text-white font-bold text-base capitalize">
         {user?.name || "Usuário"}
       </span>
@@ -33,7 +40,7 @@ export default function Header() {
             {/* Logout no menu (opcional, redundante) */}
             <div className="border-t p-2 ">
               <button
-                onClick={logout}
+                onClick={() => logout()}
                 className="text-red-500  flex items-center gap-2 w-full text-center text-sm  cursor-pointer"
               >
                 <LogOut /> Sair

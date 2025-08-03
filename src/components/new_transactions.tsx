@@ -19,7 +19,7 @@ const tipos: { label: string; value: TransactionType }[] = [
 ];
 
 export default function NewTransactions() {
-  const { accounts } = useAuth();
+  const { accounts, updateAfterTransaction } = useAuth();
   const [data, setData] = useState("");
   const [selected, setSelected] = useState<(typeof tipos)[0] | null>(null);
   const [amount, setAmount] = useState("");
@@ -39,7 +39,8 @@ export default function NewTransactions() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if (!accounts) {
+    // Verificar se accounts existe e tem pelo menos um elemento
+    if (!accounts || accounts.length === 0) {
       setError("Conta não disponível.");
       return;
     }
@@ -56,11 +57,20 @@ export default function NewTransactions() {
 
       const transactionType =
         selected?.value === TransactionType.INCOME ? "INCOME" : "EXPENSE";
+
+      // Verificar se accounts existe e tem pelo menos um elemento
+      if (!accounts || accounts.length === 0) {
+        throw new Error("Conta não disponível para criar transação");
+      }
+
       await TransactionService.create(
         accounts[0].id,
         transactionType,
         parsedAmount
       );
+
+      // Atualizar dados após transação
+      await updateAfterTransaction();
 
       setAmount(""); // limpa campo
       setSelected(null);

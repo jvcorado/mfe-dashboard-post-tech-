@@ -10,10 +10,12 @@ interface AuthContextType {
   user: UserModel | null;
   accounts: Account[];
   loading: boolean;
+  error: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
+  logout: (shouldRedirect?: boolean) => Promise<void>;
   refreshUserData: () => Promise<void>;
+  updateAfterTransaction: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -23,39 +25,94 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserModel | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Verifica se há token e carrega dados do usuário
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const token = AuthService.getToken();
+        setError(null);
+        console.log("🚀 Inicializando AuthContext do dashboard...");
+
+        // Verificar se já tem token no localStorage
+        let token = AuthService.getToken();
+
+        // Se não tem token, solicitar do MFE core
+        if (
+          !token &&
+          typeof window !== "undefined" &&
+          window.parent &&
+          window.parent !== window
+        ) {
+          console.log("🔑 Solicitando token do MFE core...");
+
+          // Enviar mensagem solicitando token
+          window.parent.postMessage({ type: "REQUEST_TOKEN" }, "*");
+
+          // Aguardar resposta por até 5 segundos
+          const tokenPromise = new Promise<string | null>((resolve) => {
+            const handleMessage = (event: MessageEvent) => {
+              if (event.data && event.data.type === "TOKEN_RESPONSE") {
+                window.removeEventListener("message", handleMessage);
+                resolve(event.data.token || null);
+              }
+            };
+
+            window.addEventListener("message", handleMessage);
+
+            // Timeout
+            setTimeout(() => {
+              window.removeEventListener("message", handleMessage);
+              resolve(null);
+            }, 5000);
+          });
+
+          token = await tokenPromise;
+
+          if (token) {
+            localStorage.setItem("auth_token", token);
+            console.log("✅ Token recebido e salvo");
+          }
+        }
+
+        console.log(
+          "🔍 Verificando token no dashboard:",
+          token ? "EXISTE" : "NÃO EXISTE"
+        );
+
         if (token) {
           // Tenta carregar dados do usuário do localStorage primeiro
           const storedUser = AuthService.getUserFromStorage();
           if (storedUser) {
+            console.log(
+              "👤 Usuário encontrado no localStorage:",
+              storedUser.name
+            );
             setUser(storedUser);
           }
 
           // Depois busca dados atualizados do servidor
+          console.log("🔄 Buscando dados atualizados do servidor...");
           await refreshUserData();
 
-          // Se está nas páginas de login/register e está autenticado, redireciona
-          if (typeof window !== "undefined") {
-            const currentPath = window.location.pathname;
-            if (
-              currentPath === "/login" ||
-              currentPath === "/register" ||
-              currentPath === "/"
-            ) {
-              window.location.href = "/dashboard";
-            }
-          }
+          console.log("✅ Dados carregados com sucesso");
+        } else {
+          console.log("❌ Token não encontrado");
+          setError("Token de autenticação não encontrado");
+          // Garantir que o estado seja válido mesmo sem token
+          setUser(null);
+          setAccounts([]);
         }
       } catch (error) {
-        console.error("Erro ao inicializar autenticação:", error);
-        // Se houver erro, limpa os dados
-        await logout();
+        console.error("❌ Erro ao inicializar autenticação:", error);
+        setError(
+          error instanceof Error ? error.message : "Erro ao carregar dados"
+        );
+        // Limpa os dados em caso de erro
+        setUser(null);
+        setAccounts([]);
       } finally {
+        console.log("✅ AuthContext inicializado - loading: false");
         setLoading(false);
       }
     };
@@ -69,10 +126,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { user: loggedUser } = await AuthService.login(email, password);
       setUser(loggedUser);
       toast.success("Login realizado com sucesso!");
-      // Redireciona para a dashboard após login bem-sucedido
-      if (typeof window !== "undefined") {
-        window.location.href = "/dashboard";
-      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Erro ao fazer login";
@@ -105,16 +158,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const logout = async () => {
+  const logout = async (shouldRedirect: boolean = true) => {
     try {
       await AuthService.logout();
-      toast.success("Logout realizado com sucesso!");
-      if (typeof window !== "undefined") {
-        window.location.href = "/";
+      setUser(null);
+      setAccounts([]);
+
+      if (shouldRedirect) {
+        toast.success("Logout realizado com sucesso!");
       }
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
-    } finally {
+      // Mesmo com erro, limpa os dados locais
       setUser(null);
       setAccounts([]);
     }
@@ -122,27 +177,67 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const refreshUserData = async () => {
     try {
+      console.log("🔄 Iniciando refreshUserData...");
       const { user: userData, accounts: userAccounts } =
         await AuthService.getCurrentUser();
       setUser(userData);
       setAccounts(userAccounts);
+      console.log(
+        "✅ Dados do usuário atualizados:",
+        userData.name,
+        "Contas:",
+        userAccounts.length
+      );
+
+      // Salvar dados atualizados no localStorage
+      localStorage.setItem("user_data", JSON.stringify(userData.toJSON()));
     } catch (error) {
-      console.error("Erro ao atualizar dados do usuário:", error);
+      console.error("❌ Erro ao atualizar dados do usuário:", error);
+      throw error;
+    }
+  };
+
+  // Método para atualizar dados após transações
+  const updateAfterTransaction = async () => {
+    try {
+      console.log("🔄 Atualizando dados após transação...");
+      setLoading(true);
+      await refreshUserData();
+      console.log("✅ Dados atualizados após transação");
+    } catch (error) {
+      console.error("❌ Erro ao atualizar dados após transação:", error);
+      setError("Erro ao atualizar dados após transação");
+    } finally {
+      setLoading(false);
     }
   };
 
   const isAuthenticated = !!user && AuthService.isAuthenticated();
 
+  // Garantir que accounts nunca seja undefined
+  const safeAccounts = accounts || [];
+
+  console.log(
+    "🎯 AuthContext render - loading:",
+    loading,
+    "isAuthenticated:",
+    isAuthenticated,
+    "user:",
+    user?.name
+  );
+
   return (
     <AuthContext.Provider
       value={{
         user,
-        accounts,
+        accounts: safeAccounts,
         loading,
+        error,
         login,
         register,
         logout,
         refreshUserData,
+        updateAfterTransaction,
         isAuthenticated,
       }}
     >
@@ -154,7 +249,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth deve ser usado dentro de um AuthProvider");
+    console.error("useAuth deve ser usado dentro de um AuthProvider");
+    // Retorna um objeto com valores padrão para evitar erros
+    return {
+      user: null,
+      accounts: [],
+      loading: false,
+      error: null,
+      login: async () => {
+        throw new Error("AuthProvider não encontrado");
+      },
+      register: async () => {
+        throw new Error("AuthProvider não encontrado");
+      },
+      logout: async () => {
+        throw new Error("AuthProvider não encontrado");
+      },
+      refreshUserData: async () => {
+        throw new Error("AuthProvider não encontrado");
+      },
+      updateAfterTransaction: async () => {
+        throw new Error("AuthProvider não encontrado");
+      },
+      isAuthenticated: false,
+    };
   }
   return context;
 };

@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { Toaster } from "react-hot-toast";
+import Container from "@/components/container";
+import Header from "@/components/header";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -17,7 +21,14 @@ export default function RootLayout({
   return (
     <html lang="pt-br">
       <body className={`${inter}  antialiased`}>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <div className="min-h-screen bg-gray-100">
+            <Header />
+            <Container className="pt-0">{children}</Container>
+          </div>
+
+          <Toaster position="top-right" />
+        </AuthProvider>
       </body>
     </html>
   );

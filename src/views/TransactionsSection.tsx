@@ -21,7 +21,7 @@ type EditableTransaction = {
 };
 
 export default function TransactionsSection() {
-  const { accounts } = useAuth();
+  const { accounts, updateAfterTransaction } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditTransactionItem, setIsEditTransactionItem] = useState(false);
@@ -32,10 +32,15 @@ export default function TransactionsSection() {
   const [isSelectingTransactionItem, setIsSelectingTransactionItem] =
     useState(false);
 
-  // Buscar transações
+  // Buscar transações quando accounts mudar
   useEffect(() => {
     const fetchTransactions = async () => {
-      if (!accounts) return;
+      // Verificar se accounts existe e tem pelo menos um elemento
+      if (!accounts || accounts.length === 0) {
+        console.log("Nenhuma conta disponível para buscar transações");
+        setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true);
@@ -76,6 +81,12 @@ export default function TransactionsSection() {
 
   const handleConfirmEditTransaction = async () => {
     if (editableTransaction && editableTransaction.id) {
+      // Verificar se accounts existe e tem pelo menos um elemento
+      if (!accounts || accounts.length === 0) {
+        console.error("Nenhuma conta disponível para atualizar transação");
+        return;
+      }
+
       try {
         const transactionType =
           editableTransaction.type === TransactionType.INCOME
@@ -87,10 +98,8 @@ export default function TransactionsSection() {
           editableTransaction.amount
         );
 
-        // Recarregar transações
-        const { transactions: updatedTransactions } =
-          await AccountService.getById(accounts[0]!.id);
-        setTransactions(updatedTransactions);
+        // Atualizar dados após transação
+        await updateAfterTransaction();
 
         setIsSelectingTransactionItem(false);
         setIsEditTransactionItem(false);
@@ -103,13 +112,17 @@ export default function TransactionsSection() {
 
   const handleConfirmDeleteTransaction = async () => {
     if (editableTransaction && editableTransaction.id) {
+      // Verificar se accounts existe e tem pelo menos um elemento
+      if (!accounts || accounts.length === 0) {
+        console.error("Nenhuma conta disponível para deletar transação");
+        return;
+      }
+
       try {
         await TransactionService.delete(editableTransaction.id);
 
-        // Recarregar transações
-        const { transactions: updatedTransactions } =
-          await AccountService.getById(accounts[0]!.id);
-        setTransactions(updatedTransactions);
+        // Atualizar dados após transação
+        await updateAfterTransaction();
 
         setIsSelectingTransactionItem(false);
         setIsDeleteTransactionItem(false);
@@ -147,39 +160,45 @@ export default function TransactionsSection() {
           />
         </div>
       </div>
-      {transactions.map((transaction, index) => (
-        <div key={transaction.id || index}>
-          <div className="flex justify-end">
-            {isEditTransactionItem && (
-              <ActionButton
-                onClick={() => handleSelectTransactionItem(transaction)}
-                content={<Pencil size={14} />}
-                colors="blue"
-                size="sm"
-              />
-            )}
-            {isDeleteTransactionItem && (
-              <ActionButton
-                onClick={() => handleSelectTransactionItem(transaction)}
-                content={<Trash2 size={14} />}
-                colors="blue"
-                size="sm"
-              />
-            )}
+      {transactions && transactions.length > 0 ? (
+        transactions.map((transaction, index) => (
+          <div key={transaction.id || index}>
+            <div className="flex justify-end">
+              {isEditTransactionItem && (
+                <ActionButton
+                  onClick={() => handleSelectTransactionItem(transaction)}
+                  content={<Pencil size={14} />}
+                  colors="blue"
+                  size="sm"
+                />
+              )}
+              {isDeleteTransactionItem && (
+                <ActionButton
+                  onClick={() => handleSelectTransactionItem(transaction)}
+                  content={<Trash2 size={14} />}
+                  colors="blue"
+                  size="sm"
+                />
+              )}
+            </div>
+            <TransactionItem
+              key={transaction.id || index}
+              date={new Date(transaction.created_at)}
+              transactionDescription={`Transação ${
+                transaction.type === TransactionType.INCOME
+                  ? "de entrada"
+                  : "de saída"
+              }`}
+              transactionType={transaction.type}
+              value={transaction.amount}
+            />
           </div>
-          <TransactionItem
-            key={transaction.id || index}
-            date={new Date(transaction.created_at)}
-            transactionDescription={`Transação ${
-              transaction.type === TransactionType.INCOME
-                ? "de entrada"
-                : "de saída"
-            }`}
-            transactionType={transaction.type}
-            value={transaction.amount}
-          />
+        ))
+      ) : (
+        <div className="text-center text-gray-500 py-8">
+          <p>Nenhuma transação encontrada</p>
         </div>
-      ))}
+      )}
 
       {isSelectingTransactionItem && editableTransaction && (
         <EditTransactionDialog
