@@ -97,11 +97,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           console.log("✅ Dados carregados com sucesso");
         } else {
-          console.log("❌ Token não encontrado");
+          console.log("❌ Token não encontrado - usuário não autenticado");
           setError("Token de autenticação não encontrado");
           // Garantir que o estado seja válido mesmo sem token
           setUser(null);
           setAccounts([]);
+
+          // Se não tem token, não está autenticado
+          console.log(
+            "🚫 Usuário não autenticado - será redirecionado pelo ProtectedRoute"
+          );
         }
       } catch (error) {
         console.error("❌ Erro ao inicializar autenticação:", error);
@@ -166,12 +171,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (shouldRedirect) {
         toast.success("Logout realizado com sucesso!");
+        // Redirecionar para a página inicial do MFE core
+        window.location.href = "/";
       }
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
       // Mesmo com erro, limpa os dados locais
       setUser(null);
       setAccounts([]);
+
+      if (shouldRedirect) {
+        // Redirecionar mesmo em caso de erro
+        window.location.href = "/";
+      }
     }
   };
 
@@ -212,7 +224,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const isAuthenticated = !!user && AuthService.isAuthenticated();
+  const isAuthenticated = !!user && !!AuthService.getToken();
 
   // Garantir que accounts nunca seja undefined
   const safeAccounts = accounts || [];
@@ -223,7 +235,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     "isAuthenticated:",
     isAuthenticated,
     "user:",
-    user?.name
+    user?.name,
+    "token:",
+    AuthService.getToken() ? "EXISTE" : "NÃO EXISTE"
   );
 
   return (

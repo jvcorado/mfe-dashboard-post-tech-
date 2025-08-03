@@ -9,13 +9,6 @@ export default function Header() {
   const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  console.log(
-    "🔍 Header render - user:",
-    user?.name,
-    "isMenuOpen:",
-    isMenuOpen
-  );
-
   return (
     <header className="bg-[#004D61] h-24 flex items-center justify-between px-6 sticky top-0 left-0 z-50 w-full">
       <span className="text-white font-bold text-base capitalize">
