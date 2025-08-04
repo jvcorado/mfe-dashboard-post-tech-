@@ -1,8 +1,9 @@
-import { TransactionType } from "./TransactionType";
+import { TransactionSubtype, TransactionType } from "./TransactionType";
 
 export interface TransactionData {
   id: number;
-  type: 'INCOME' | 'EXPENSE';
+  type: "INCOME" | "EXPENSE";
+  subtype: TransactionSubtype;
   amount: number;
   account_id: number;
   created_at: string;
@@ -12,6 +13,7 @@ export interface TransactionData {
 export class Transaction {
   public id: number;
   public type: TransactionType;
+  public subtype: TransactionSubtype;
   public amount: number;
   public account_id: number;
   public created_at: string;
@@ -19,7 +21,9 @@ export class Transaction {
 
   constructor(data: TransactionData) {
     this.id = data.id;
-    this.type = data.type === 'INCOME' ? TransactionType.INCOME : TransactionType.EXPENSE;
+    this.type =
+      data.type === "INCOME" ? TransactionType.INCOME : TransactionType.EXPENSE;
+    this.subtype = data.subtype; // Default subtype, can be extended later
     this.amount = data.amount;
     this.account_id = data.account_id;
     this.created_at = data.created_at;
@@ -33,7 +37,8 @@ export class Transaction {
   toJSON(): TransactionData {
     return {
       id: this.id,
-      type: this.type === TransactionType.INCOME ? 'INCOME' : 'EXPENSE',
+      type: this.type === TransactionType.INCOME ? TransactionType.INCOME : TransactionType.INCOME,
+      subtype: this.subtype,
       amount: this.amount,
       account_id: this.account_id,
       created_at: this.created_at,
@@ -43,20 +48,20 @@ export class Transaction {
 
   // Formatação de valor para exibição
   getFormattedAmount(): string {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(this.amount);
   }
 
   // Formatação de data para exibição
   getFormattedDate(): string {
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Intl.DateTimeFormat("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(new Date(this.created_at));
   }
 

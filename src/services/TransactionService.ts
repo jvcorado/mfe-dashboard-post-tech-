@@ -1,11 +1,13 @@
 // services/TransactionService.ts
 import api, { TransactionRequest, TransactionResponse } from '@/lib/api';
 import { Transaction } from '@/models/Transaction';
+import { TransactionType } from '@/models/TransactionType';
 import { AxiosError } from 'axios';
 
 export class TransactionService {
   // Cria nova transação para uma conta específica
-  static async create(accountId: number, type: 'INCOME' | 'EXPENSE', amount: number): Promise<Transaction> {
+  //TODO: Implementar o upload de documento no formato multipart/form-data
+  static async create(accountId: number, type: TransactionType, amount: number): Promise<Transaction> {
     try {
       const transactionData: TransactionRequest = { type, amount };
       const response = await api.post<TransactionResponse>(`/accounts/${accountId}/transactions`, transactionData);
@@ -29,7 +31,7 @@ export class TransactionService {
   }
 
   // Atualiza transação existente
-  static async update(id: number, type: 'INCOME' | 'EXPENSE', amount: number): Promise<Transaction> {
+  static async update(id: number, type: TransactionType, amount: number): Promise<Transaction> {
     try {
       const transactionData: TransactionRequest = { type, amount };
       const response = await api.put<TransactionResponse>(`/transactions/${id}`, transactionData);
