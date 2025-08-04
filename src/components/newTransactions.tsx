@@ -56,7 +56,9 @@ export default function NewTransactions() {
       setError(null);
 
       const transactionType =
-        selected?.value === TransactionType.INCOME ? "INCOME" : "EXPENSE";
+        selected?.value === TransactionType.INCOME
+          ? TransactionType.INCOME
+          : TransactionType.EXPENSE;
 
       // Verificar se accounts existe e tem pelo menos um elemento
       if (!accounts || accounts.length === 0) {
