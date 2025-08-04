@@ -29,22 +29,24 @@ const FilterTransactionsDialog = ({
       onOpenChange={onOpenChange}
       actionComponent={
         <Button
-          text="Mostrar resultados"
           colors="green"
           onClick={() => {
             onConfirmAction();
             onOpenChange(false);
           }}
-        />
+        >
+          Mostrar resultados
+        </Button>
       }
       cancelComponent={
         <Button
-          text="Limpar e fechar"
           colors="black"
           onClick={() => {
             onClearFilters();
           }}
-        />
+        >
+          Limpar e fechar
+        </Button>
       }
       title={title}
       description={description}
