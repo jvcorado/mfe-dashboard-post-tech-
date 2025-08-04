@@ -23,20 +23,19 @@ const EditTransactionDialog = ({
       onOpenChange={onOpenChange}
       actionComponent={
         <Button
-          text="Confirmar"
           colors="green"
           onClick={() => {
             onConfirmAction();
             onOpenChange(false);
           }}
-        />
+        >
+          Confirmar
+        </Button>
       }
       cancelComponent={
-        <Button
-          text="Cancelar"
-          colors="black"
-          onClick={() => onOpenChange(false)}
-        />
+        <Button colors="black" onClick={() => onOpenChange(false)}>
+          Cancelar
+        </Button>
       }
       title={title}
       description={description}

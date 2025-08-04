@@ -155,3 +155,7 @@
 .scrollbar-hidden::-webkit-scrollbar {
   display: none;
 }
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
