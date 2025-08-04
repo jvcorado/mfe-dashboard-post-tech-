@@ -204,6 +204,12 @@ export interface TransactionRequest {
     amount: number;
 }
 
+export interface TransactionWithDocumentRequest {
+    type: TransactionType;
+    amount: number;
+    document?: File;
+}
+
 export interface TransactionResponse {
     id: number;
     type: TransactionType;

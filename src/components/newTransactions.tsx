@@ -16,6 +16,7 @@ import Transacaobg1 from "@/assets/illustrations/Transacaobg1";
 import IconeSeta from "@/assets/illustrations/IconeSeta";
 import { LoaderCircle } from "lucide-react";
 import { format } from "date-fns";
+import UploadDocument from "./uploadDocument";
 
 export default function NewTransactions() {
   const { accounts, updateAfterTransaction } = useAuth();
@@ -30,6 +31,7 @@ export default function NewTransactions() {
   // const [subtype, setSubType] = useState<TransactionSubtype>(
   //   TransactionSubtype.DOC_TED
   // );
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [lastTransaction, setLastTransaction] = useState<{
     label: string;
     amount: number;
@@ -137,6 +139,7 @@ export default function NewTransactions() {
       setType(typeSelected?.type as TransactionType);
       setTypeSelected(null);
       // setSubType(typeSelected?.subtype as TransactionSubtype);
+      setDocumentFile(null);
       setLastTransaction({
         label: typeSelected?.label as string,
         amount: parsedAmount,
@@ -271,6 +274,16 @@ export default function NewTransactions() {
             max={format(new Date(), "yyyy-MM-dd")}
             onChange={(e) => setDate(e.target.value)}
             className="w-full z-10 max-w-[250px] min-h-[48px] border border-[#004D61] bg-white text-[#444444] rounded-lg py-2 px-2 text-base"
+          />
+        </div>
+
+        <div className="relative pt-4 ml-4 sm:ml-8 md:ml-16">
+          <label className="block font-medium mb-1 text-base">
+            Comprovante:
+          </label>
+          <UploadDocument
+            onFileSelected={(file) => setDocumentFile(file)}
+            selectedFile={documentFile}
           />
         </div>
 
