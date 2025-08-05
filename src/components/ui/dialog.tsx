@@ -34,7 +34,7 @@ function Dialog({
             "flex flex-col",
             isFullScreen
               ? "top-1/2 left-1/2 w-[calc(100%-2rem)] h-[calc(100%-2rem)] max-w-4xl rounded-lg transform -translate-x-1/2 -translate-y-1/2 p-6"
-              : "top-1/2 left-1/2 w-[calc(100%-2rem)] max-w-md p-6 rounded-lg transform -translate-x-1/2 -translate-y-1/2"
+              : "top-1/2 left-1/2 w-[calc(100%-2rem)] max-w-md min-h-3/5 p-6 rounded-lg transform -translate-x-1/2 -translate-y-1/2"
           )}
         >
           <div className="flex-1 overflow-auto">

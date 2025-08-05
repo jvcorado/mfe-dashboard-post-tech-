@@ -1,7 +1,7 @@
 // services/TransactionService.ts
 import api, { TransactionRequest, TransactionResponse, TransactionWithDocumentRequest } from "@/lib/api";
 import { Transaction } from "@/models/Transaction";
-import { TransactionType } from "@/models/TransactionType";
+import { TransactionSubtype, TransactionType } from "@/models/TransactionType";
 import { AxiosError } from "axios";
 
 export class TransactionService {
@@ -10,10 +10,11 @@ export class TransactionService {
   static async create(
     accountId: number,
     type: TransactionType,
+    subtype: TransactionSubtype,
     amount: number
   ): Promise<Transaction> {
     try {
-      const transactionData: TransactionRequest = { type, amount };
+      const transactionData: TransactionRequest = { type, subtype, amount };
       const response = await api.post<TransactionResponse>(
         `/accounts/${accountId}/transactions`,
         transactionData
@@ -84,10 +85,11 @@ export class TransactionService {
   static async update(
     id: number,
     type: TransactionType,
+    subtype: TransactionSubtype,
     amount: number
   ): Promise<Transaction> {
     try {
-      const transactionData: TransactionRequest = { type, amount };
+      const transactionData: TransactionRequest = { type, amount, subtype };
       const response = await api.put<TransactionResponse>(
         `/transactions/${id}`,
         transactionData

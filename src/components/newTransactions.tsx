@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Listbox } from "@headlessui/react";
 import { useAuth } from "@/context/AuthContext";
 import { TransactionService } from "@/services/TransactionService";
-import { TransactionType } from "@/models/TransactionType";
+import { TransactionSubtype, TransactionType } from "@/models/TransactionType";
 import Button from "@/components/button";
 import Snackbar, { SnackbarProps } from "@/components/snackbar";
 import { Input } from "@/components/ui/input";
@@ -28,9 +28,9 @@ export default function NewTransactions() {
   const [disabledButton, setDisabledButton] = useState(true);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [type, setType] = useState<TransactionType>(TransactionType.INCOME);
-  // const [subtype, setSubType] = useState<TransactionSubtype>(
-  //   TransactionSubtype.DOC_TED
-  // );
+  const [subtype, setSubType] = useState<TransactionSubtype>(
+    TransactionSubtype.DOC_TED
+  );
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [lastTransaction, setLastTransaction] = useState<{
     label: string;
@@ -131,14 +131,19 @@ export default function NewTransactions() {
       }
 
       //TODOL Adicionar subtype ao criar transação
-      await TransactionService.create(accounts[0].id, type, parsedAmount);
+      await TransactionService.create(
+        accounts[0].id,
+        type,
+        subtype,
+        parsedAmount
+      );
 
       await updateAfterTransaction();
 
       setAmount("");
       setType(typeSelected?.type as TransactionType);
       setTypeSelected(null);
-      // setSubType(typeSelected?.subtype as TransactionSubtype);
+      setSubType(typeSelected?.subtype as TransactionSubtype);
       setDocumentFile(null);
       setLastTransaction({
         label: typeSelected?.label as string,
@@ -198,7 +203,7 @@ export default function NewTransactions() {
             onChange={(value) => {
               setTypeSelected(value);
               setType(value?.type as TransactionType);
-              // setSubType(value?.subtype as TransactionSubtype);
+              setSubType(value?.subtype as TransactionSubtype);
             }}
           >
             {() => (

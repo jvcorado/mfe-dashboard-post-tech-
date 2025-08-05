@@ -97,7 +97,6 @@ export default function TransactionsSection() {
     setCurrentPage(page);
   };
 
-  // Buscar transações quando accounts mudar
   useEffect(() => {
     const fetchTransactions = async () => {
       // Verificar se accounts existe e tem pelo menos um elemento
@@ -142,7 +141,7 @@ export default function TransactionsSection() {
   // TODO: Verificar se é necessário atualizar essa função depois de atualizar a função de update
   const handleConfirmEditTransaction = async () => {
     if (editableTransaction && editableTransaction.id) {
-      // Verificar se accounts existe e tem pelo menos um elemento
+
       if (!accounts || accounts.length === 0) {
         console.error("Nenhuma conta disponível para atualizar transação");
         return;
@@ -155,7 +154,8 @@ export default function TransactionsSection() {
             : TransactionType.EXPENSE;
         await TransactionService.update(
           editableTransaction.id,
-          transactionType,
+          editableTransaction.type,
+          editableTransaction.subtype,
           editableTransaction.amount
         );
 

@@ -201,6 +201,7 @@ export interface AccountDetailResponse {
 // Tipos para transações
 export interface TransactionRequest {
     type: TransactionType;
+    subtype: TransactionSubtype;
     amount: number;
 }
 
