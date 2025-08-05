@@ -21,7 +21,7 @@ const SelectTransactionPeriod = ({
       <SelectTrigger className="inline-flex items-center justify-between w-full px-4 py-2 bg-white border rounded-md shadow-sm">
         <SelectValue placeholder="Período" />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="z-9999" position="popper">
         <SelectGroup>
           {periods.map((period) => (
             <SelectItem key={period.value} value={period.value}>
