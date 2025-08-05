@@ -148,10 +148,6 @@ export default function TransactionsSection() {
       }
 
       try {
-        const transactionType =
-          editableTransaction.type === TransactionType.INCOME
-            ? TransactionType.INCOME
-            : TransactionType.EXPENSE;
         await TransactionService.update(
           editableTransaction.id,
           editableTransaction.type,
