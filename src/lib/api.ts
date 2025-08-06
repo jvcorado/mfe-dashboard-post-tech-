@@ -1,5 +1,4 @@
-import { TransactionSubtype, TransactionType } from '@/models/TransactionType';
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios';
 import toast from 'react-hot-toast';
 
 // Configuração base da API
@@ -79,11 +78,61 @@ api.interceptors.request.use(
 // Interceptor para tratamento de respostas e erros
 api.interceptors.response.use(
     (response) => {
+        // Verificar se há um novo token na resposta
+        const newToken = response.headers['x-new-token'];
+        const tokenExpiresAt = response.headers['x-token-expires-at'];
+
+        if (newToken) {
+            console.log("🔄 Novo token recebido automaticamente");
+            localStorage.setItem('auth_token', newToken);
+            if (tokenExpiresAt) {
+                localStorage.setItem('token_expires_at', tokenExpiresAt);
+            }
+        }
+
         return response;
     },
-    (error: AxiosError) => {
+    async (error: AxiosError) => {
+        const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+
         // Token expirado ou inválido
-        if (error.response?.status === 401) {
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+
+            try {
+                // Tentar renovar o token
+                const currentToken = localStorage.getItem('auth_token');
+                if (currentToken) {
+                    console.log("🔄 Tentando renovar token...");
+
+                    const refreshResponse = await axios.post(`${API_BASE_URL}/refresh`, {}, {
+                        headers: {
+                            'Authorization': `Bearer ${currentToken}`,
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    const { access_token } = refreshResponse.data;
+
+                    if (access_token) {
+                        // Atualizar token no localStorage
+                        localStorage.setItem('auth_token', access_token);
+                        console.log("✅ Token renovado com sucesso");
+
+                        // Atualizar header da requisição original
+                        if (originalRequest.headers) {
+                            originalRequest.headers.Authorization = `Bearer ${access_token}`;
+                        }
+
+                        // Repetir a requisição original
+                        return api(originalRequest);
+                    }
+                }
+            } catch (refreshError) {
+                console.log("❌ Falha ao renovar token:", refreshError);
+            }
+
+            // Se chegou aqui, não conseguiu renovar o token
             localStorage.removeItem('auth_token');
             localStorage.removeItem('user_data');
             toast.error('Sessão expirada. Faça login novamente.');
@@ -117,7 +166,7 @@ api.interceptors.response.use(
 
 export default api;
 
-// Tipos para as respostas da API
+// Tipos para as requisições e respostas da API
 export interface ApiResponse<T> {
     data: T;
     message?: string;
@@ -128,7 +177,6 @@ export interface ApiError {
     errors?: Record<string, string[]>;
 }
 
-// Tipos para autenticação
 export interface LoginRequest {
     email: string;
     password: string;
@@ -151,6 +199,7 @@ export interface AuthResponse {
     };
     access_token: string;
     token_type: string;
+    expires_at?: string;
     message: string;
 }
 
@@ -172,7 +221,6 @@ export interface UserResponse {
     }>;
 }
 
-// Tipos para contas
 export interface AccountResponse {
     id: number;
     name: string;
@@ -188,7 +236,7 @@ export interface AccountDetailResponse {
     balance: number;
     transactions: Array<{
         id: number;
-        type: TransactionType;
+        type: 'INCOME' | 'EXPENSE';
         amount: number;
         account_id: number;
         created_at: string;
@@ -198,23 +246,14 @@ export interface AccountDetailResponse {
     updated_at: string;
 }
 
-// Tipos para transações
 export interface TransactionRequest {
-    type: TransactionType;
-    subtype: TransactionSubtype;
+    type: 'INCOME' | 'EXPENSE';
     amount: number;
-}
-
-export interface TransactionWithDocumentRequest {
-    type: TransactionType;
-    amount: number;
-    document?: File;
 }
 
 export interface TransactionResponse {
     id: number;
-    type: TransactionType;
-    subtype: TransactionSubtype;
+    type: 'INCOME' | 'EXPENSE';
     amount: number;
     account_id: number;
     created_at: string;
