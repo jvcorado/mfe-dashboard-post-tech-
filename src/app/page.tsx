@@ -1,9 +1,6 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import Menu from "@/components/menu";
-import TransactionsSection from "@/views/TransactionsSection";
-import FinanceChart from "@/components/FinanceChart";
 import Dashboard from "./dashboard/page";
 
 export default function Home() {
@@ -69,7 +66,7 @@ export default function Home() {
   // Renderizar dashboard com dados
   return (
     <div className="flex flex-col lg:flex-row justify-center items-start gap-6 py-6 px-4 w-full md:h-[calc(100vh_-_6rem)] max-w-screen-xl mx-auto mb-6 lg:mb-0 h-full">
-    <Dashboard />
+      <Dashboard />
     </div>
   );
 }

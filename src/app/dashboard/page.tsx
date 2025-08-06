@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Menu from "@/components/menu";
 import TransactionsSection from "@/views/TransactionsSection";
@@ -67,16 +68,17 @@ export default function Dashboard() {
 
   // Renderizar dashboard com dados
   return (
-      <div className="flex flex-col lg:flex-row justify-center items-start gap-6 py-6 px-4 w-full mx-auto">
+    <div className="flex flex-col lg:flex-row justify-center items-start gap-6 py-6 px-4 w-full mx-auto">
       {/* Menu lateral (vira horizontal em telas menores) */}
       <div className="bg-white w-full max-w-[282px] h-full rounded-[8px] hidden lg:block">
-        <Menu/>
+        <Suspense fallback={<div className="p-4">Carregando menu...</div>}>
+          <Menu />
+        </Suspense>
       </div>
 
       {/* Seção principal */}
       <div>
         <FinanceChart />
-        
 
         {/* TransactionsSection em mobile */}
         <div className="block lg:hidden bg-white rounded-[8px] w-full p-4">

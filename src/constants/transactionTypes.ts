@@ -1,4 +1,4 @@
-import { TransactionType, TransactionSubtype } from "@/models/TransactionType";
+import { TransactionType } from "@/models/TransactionType";
 
 export const transactionTypes: { label: string; type: TransactionType, subtype: string }[] = [
   { label: "DOC/TED", type: TransactionType.EXPENSE, subtype: "doc_ted" },

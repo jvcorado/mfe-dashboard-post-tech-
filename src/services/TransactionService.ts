@@ -3,7 +3,6 @@ import api, { TransactionRequest, TransactionResponse } from "@/lib/api";
 import { Transaction } from "@/models/Transaction";
 import { TransactionSubtype, TransactionType } from "@/models/TransactionType";
 import { AxiosError } from "axios";
-import { id } from "date-fns/locale";
 
 export class TransactionService {
   // Cria nova transação para uma conta específica
@@ -110,6 +109,20 @@ export class TransactionService {
         throw new Error('Conta não encontrada');
       }
       throw new Error('Erro ao buscar transações');
+    }
+  }
+
+  // Busca todas as transações de uma conta específica
+  static async getAllByAccount(accountId: number): Promise<Transaction[]> {
+    try {
+      const response = await api.get(`/accounts/${accountId}/transactions`);
+      return response.data.transactions.map((transaction: TransactionResponse) => Transaction.fromJSON(transaction));
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message?: string }>;
+      if (axiosError.response?.status === 404) {
+        throw new Error('Conta não encontrada');
+      }
+      throw new Error('Erro ao buscar transações da conta');
     }
   }
 }

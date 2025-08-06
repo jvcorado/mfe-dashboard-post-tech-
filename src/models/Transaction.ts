@@ -1,4 +1,4 @@
-import { th } from "date-fns/locale";
+
 import { TransactionSubtype, TransactionType } from "./TransactionType";
 
 export interface TransactionData {
@@ -39,7 +39,7 @@ export class Transaction {
     this.account_id = data.account_id;
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
-   // this.date = data.date ?? new Date();
+    // this.date = data.date ?? new Date();
     //this.description = data.description;
   }
 

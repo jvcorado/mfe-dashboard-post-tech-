@@ -12,7 +12,7 @@ export interface AccountData {
   transactions_count?: number;
   created_at: string;
   updated_at: string;
- // description: string;
+  // description: string;
 }
 
 export class Account {
@@ -98,18 +98,15 @@ export class Account {
       const category = tx.subtype || "Outros";
 
       if (!grouped[category]) {
-
         grouped[category] = Transaction.fromJSON({
           id: tx.id,
           subtype: category,
-          amount: tx.amount,
+          amount: 0, // Inicializa com zero para somar corretamente
           type: TransactionType.EXPENSE,
-          //subtype: tx.subtype,
           account_id: tx.account_id,
-          //date: tx.date,
-          //subtype: tx.subtype,
-          created_at:tx.created_at,
+          created_at: tx.created_at,
           updated_at: tx.updated_at,
+          description: tx.description || "", // Adiciona a propriedade obrigatória 'description'
         });
       }
 

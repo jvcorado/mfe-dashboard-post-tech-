@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
+import "../../app/globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import Container from "@/components/container";
 import Header from "@/components/header";
-
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,7 +28,6 @@ export default function RootLayout({
           </div>
 
           <Toaster position="top-right" />
-         
         </AuthProvider>
       </body>
     </html>
