@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import Container from "@/components/container";
+import Header from "@/components/header";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,6 +23,7 @@ export default function RootLayout({
       <body className={`${inter}  antialiased`}>
         <AuthProvider>
           <div className="min-h-screen bg-gray-100">
+            <Header />
             <Container className="pt-0">{children}</Container>
           </div>
 
