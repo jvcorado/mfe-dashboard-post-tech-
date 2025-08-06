@@ -1,3 +1,4 @@
+import { TransactionSubtype, TransactionType } from '@/models/TransactionType';
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import toast from 'react-hot-toast';
 
@@ -187,7 +188,7 @@ export interface AccountDetailResponse {
     balance: number;
     transactions: Array<{
         id: number;
-        type: 'INCOME' | 'EXPENSE';
+        type: TransactionType;
         amount: number;
         account_id: number;
         created_at: string;
@@ -199,13 +200,21 @@ export interface AccountDetailResponse {
 
 // Tipos para transações
 export interface TransactionRequest {
-    type: 'INCOME' | 'EXPENSE';
+    type: TransactionType;
+    subtype: TransactionSubtype;
     amount: number;
+}
+
+export interface TransactionWithDocumentRequest {
+    type: TransactionType;
+    amount: number;
+    document?: File;
 }
 
 export interface TransactionResponse {
     id: number;
-    type: 'INCOME' | 'EXPENSE';
+    type: TransactionType;
+    subtype: TransactionSubtype;
     amount: number;
     account_id: number;
     created_at: string;

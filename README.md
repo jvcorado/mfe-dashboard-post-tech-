@@ -16,7 +16,7 @@ O MFE Dashboard é o coração operacional do ByteBank, oferecendo uma interface
 ### ENV
 
 ```
-NEXT_PUBLIC_API_URL = "http://localhost:8000/api"
+NEXT_PUBLIC_API_URL = "https://byte-bank-api.onrender.com/api"
 NEXT_PUBLIC_MF_URL_AUTH = "http://localhost:3002"
 ```
 

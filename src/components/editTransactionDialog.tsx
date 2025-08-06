@@ -19,31 +19,30 @@ const EditTransactionDialog = ({
 }) => {
   return (
     <div className="z-999">
-    <Dialog
-      open={open}
-      onOpenChange={onOpenChange}
-      actionComponent={
-        <Button
-          text="Confirmar"
-          colors="green"
-          onClick={() => {
-            onConfirmAction();
-            onOpenChange(false);
-          }}
-        />
-      }
-      cancelComponent={
-        <Button
-          text="Cancelar"
-          colors="black"
-          onClick={() => onOpenChange(false)}
-        />
-      }
-      title={title}
-      description={description}
-    >
-      {children || null}
-    </Dialog>
+      <Dialog
+        open={open}
+        onOpenChange={onOpenChange}
+        actionComponent={
+          <Button
+            colors="green"
+            onClick={() => {
+              onConfirmAction();
+              onOpenChange(false);
+            }}
+          >
+            Confirmar
+          </Button>
+        }
+        cancelComponent={
+          <Button colors="black" onClick={() => onOpenChange(false)}>
+            Cancelar
+          </Button>
+        }
+        title={title}
+        description={description}
+      >
+        {children || null}
+      </Dialog>
     </div>
   );
 };
