@@ -1,4 +1,5 @@
 import { TransactionSubtype, TransactionType } from '@/models/TransactionType';
+import { PaginationMeta } from '@/types/Pagination';
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import toast from 'react-hot-toast';
 
@@ -196,6 +197,7 @@ export interface AccountDetailResponse {
     }>;
     created_at: string;
     updated_at: string;
+    pagination: PaginationMeta
 }
 
 // Tipos para transações
@@ -203,6 +205,8 @@ export interface TransactionRequest {
     type: TransactionType;
     subtype: TransactionSubtype;
     amount: number;
+    description: string;
+    document?: string;
 }
 
 export interface TransactionWithDocumentRequest {
@@ -216,6 +220,8 @@ export interface TransactionResponse {
     type: TransactionType;
     subtype: TransactionSubtype;
     amount: number;
+    description: string;
+    document?: string;
     account_id: number;
     created_at: string;
     updated_at: string;

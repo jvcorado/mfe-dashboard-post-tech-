@@ -11,10 +11,12 @@ export class TransactionService {
     accountId: number,
     type: TransactionType,
     subtype: TransactionSubtype,
-    amount: number
+    description: string,
+    amount: number,
+    document?: string,
   ): Promise<Transaction> {
     try {
-      const transactionData: TransactionRequest = { type, subtype, amount };
+      const transactionData: TransactionRequest = { type, subtype, amount, description, document };
       const response = await api.post<TransactionResponse>(
         `/accounts/${accountId}/transactions`,
         transactionData
@@ -86,10 +88,12 @@ export class TransactionService {
     id: number,
     type: TransactionType,
     subtype: TransactionSubtype,
-    amount: number
+    amount: number,
+    description: string,
+    document?: string
   ): Promise<Transaction> {
     try {
-      const transactionData: TransactionRequest = { type, amount, subtype };
+      const transactionData: TransactionRequest = { type, amount, subtype, description, document };
       const response = await api.put<TransactionResponse>(
         `/transactions/${id}`,
         transactionData

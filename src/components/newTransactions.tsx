@@ -135,7 +135,9 @@ export default function NewTransactions() {
         accounts[0].id,
         type,
         subtype,
-        parsedAmount
+        typeSelected?.label as string,
+        parsedAmount,
+        documentFile?.name,
       );
 
       await updateAfterTransaction();
