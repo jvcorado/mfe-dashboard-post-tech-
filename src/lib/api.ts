@@ -257,14 +257,10 @@ export interface TransactionRequest {
     document?: string;
 }
 
-export interface TransactionWithDocumentRequest {
-    type: TransactionType;
-    amount: number;
-}
-
 export interface TransactionResponse {
     id: number;
-    type: 'INCOME' | 'EXPENSE';
+    type: TransactionType;
+    subtype: TransactionSubtype;
     amount: number;
     description: string;
     document?: string;

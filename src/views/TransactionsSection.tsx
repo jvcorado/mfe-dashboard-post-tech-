@@ -113,6 +113,7 @@ export default function TransactionsSection() {
 
   useEffect(() => {
     fetchTransactions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accounts]);
 
   const handleSelectTransactionItem = (transaction: Transaction) => {

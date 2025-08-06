@@ -1,5 +1,5 @@
 // services/TransactionService.ts
-import api, { TransactionRequest, TransactionResponse, TransactionWithDocumentRequest } from "@/lib/api";
+import api, { TransactionRequest, TransactionResponse } from "@/lib/api";
 import { Transaction } from "@/models/Transaction";
 import { TransactionSubtype, TransactionType } from "@/models/TransactionType";
 import { AxiosError } from "axios";
@@ -41,48 +41,6 @@ export class TransactionService {
       throw new Error("Erro ao criar transação");
     }
   }
-
-  static async createWithDocument(
-    accountId: number,
-    type: TransactionType,
-    amount: number,
-    document: File
-  ): Promise<Transaction> {
-    try {
-      const formData = new FormData();
-      formData.append("amount", String(amount));
-      formData.append("type", type);
-
-      if (document) {
-        formData.append("document", document);
-      }
-
-      const transactionData: TransactionWithDocumentRequest = { type, amount, document };
-      const response = await api.post<TransactionResponse>(
-        `/accounts/${accountId}/transactions`,
-        transactionData
-      );
-      return Transaction.fromJSON(response.data);
-    } catch (error) {
-      const axiosError = error as AxiosError<{
-        errors?: Record<string, string[]>;
-      }>;
-      if (axiosError.response?.status === 422) {
-        const errors = axiosError.response.data.errors;
-        if (errors?.amount) {
-          throw new Error(errors.amount[0]);
-        }
-        if (errors?.type) {
-          throw new Error(errors.type[0]);
-        }
-      }
-      if (axiosError.response?.status === 404) {
-        throw new Error("Conta não encontrada");
-      }
-      throw new Error("Erro ao criar transação");
-    }
-  }
-
   // Atualiza transação existente
   static async update(
     id: number,
