@@ -225,10 +225,9 @@ export default function NewTransactions() {
                       key={`${type.label}-${type.subtype}`}
                       value={type}
                       className={({ active }) =>
-                        `cursor-pointer px-4 py-2 ${
-                          active
-                            ? "bg-[#E4EDE3] text-black rounded-lg"
-                            : "text-[#444444]"
+                        `cursor-pointer px-4 py-2 ${active
+                          ? "bg-[#E4EDE3] text-black rounded-lg"
+                          : "text-[#444444]"
                         }`
                       }
                     >

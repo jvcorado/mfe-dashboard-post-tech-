@@ -1,3 +1,4 @@
+import { th } from "date-fns/locale";
 import { TransactionSubtype, TransactionType } from "./TransactionType";
 
 export interface TransactionData {
@@ -10,6 +11,8 @@ export interface TransactionData {
   account_id: number;
   created_at: string;
   updated_at: string;
+  ///date: Date;
+  //description: string;
 }
 
 export class Transaction {
@@ -22,6 +25,8 @@ export class Transaction {
   public account_id: number;
   public created_at: string;
   public updated_at: string;
+  //public date: Date;
+  //public description: string;
 
   constructor(data: TransactionData) {
     this.id = data.id;
@@ -34,6 +39,8 @@ export class Transaction {
     this.account_id = data.account_id;
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
+   // this.date = data.date ?? new Date();
+    //this.description = data.description;
   }
 
   static fromJSON(data: TransactionData): Transaction {
@@ -51,6 +58,8 @@ export class Transaction {
       account_id: this.account_id,
       created_at: this.created_at,
       updated_at: this.updated_at,
+      //date: this.date,
+      ///description: this.description,
     };
   }
 

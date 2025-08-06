@@ -159,3 +159,9 @@
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+/* Graficos Labels */
+.recharts-pie-label-text {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+}

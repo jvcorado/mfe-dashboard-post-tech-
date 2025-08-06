@@ -4,9 +4,8 @@ import { useAuth } from "@/context/AuthContext";
 import Menu from "@/components/menu";
 import TransactionsSection from "@/views/TransactionsSection";
 import FinanceChart from "@/components/FinanceChart";
-import Dashboard from "./dashboard/page";
 
-export default function Home() {
+export default function Dashboard() {
   const { user, accounts, error } = useAuth();
 
   // Mostrar loading enquanto carrega
@@ -68,8 +67,22 @@ export default function Home() {
 
   // Renderizar dashboard com dados
   return (
-    <div className="flex flex-col lg:flex-row justify-center items-start gap-6 py-6 px-4 w-full md:h-[calc(100vh_-_6rem)] max-w-screen-xl mx-auto mb-6 lg:mb-0 h-full">
-    <Dashboard />
+      <div className="flex flex-col lg:flex-row justify-center items-start gap-6 py-6 px-4 w-full mx-auto">
+      {/* Menu lateral (vira horizontal em telas menores) */}
+      <div className="bg-white w-full max-w-[282px] h-full rounded-[8px] hidden lg:block">
+        <Menu/>
+      </div>
+
+      {/* Seção principal */}
+      <div>
+        <FinanceChart />
+        
+
+        {/* TransactionsSection em mobile */}
+        <div className="block lg:hidden bg-white rounded-[8px] w-full p-4">
+          <TransactionsSection />
+        </div>
+      </div>
     </div>
   );
 }
