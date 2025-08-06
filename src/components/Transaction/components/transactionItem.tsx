@@ -1,6 +1,7 @@
 import React from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Paperclip } from "lucide-react";
 
 import { formatCurrencyBRL } from "@/lib/formatCurrency";
 import { TransactionType } from "@/models/TransactionType";
@@ -10,7 +11,7 @@ type TransactionItemProps = {
   transaction: Transaction;
 };
 export default function TransactionItem({ transaction }: TransactionItemProps) {
-  const { created_at, description, type, amount } = transaction;
+  const { created_at, description, type, amount, document } = transaction;
   const monthName = format(created_at, "MMMM", { locale: ptBR });
   const capitalizedMonth =
     monthName.charAt(0).toUpperCase() + monthName.slice(1);
@@ -28,8 +29,13 @@ export default function TransactionItem({ transaction }: TransactionItemProps) {
       <p className="self-start text-black text-base font-bold">{`${
         type === TransactionType.EXPENSE ? "-" : ""
       }${formatCurrencyBRL(amount)} `}</p>
+      {document && (
+        <div className="flex items-center gap-2 text-[#8B8B8B] text-sm">
+          <Paperclip size={12} />
+          <p>{document}</p>
+        </div>
+      )}
       <div className="border-b-2 pb-4 border-[#47A138] opacity-50 w-[180px]" />
-      {/* {document && <p>{document}</p>} */}
     </div>
   );
 }
