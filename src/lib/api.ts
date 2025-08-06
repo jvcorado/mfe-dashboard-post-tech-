@@ -249,6 +249,18 @@ export interface AccountDetailResponse {
     pagination: PaginationMeta
 }
 
+export interface SearchTransactionsResponse {
+    transactions: Array<{
+        id: number;
+        type: 'INCOME' | 'EXPENSE';
+        amount: number;
+        account_id: number;
+        created_at: string;
+        updated_at: string;
+    }>;
+    total: number;
+}
+
 export interface TransactionRequest {
     type: TransactionType;
     subtype: TransactionSubtype;

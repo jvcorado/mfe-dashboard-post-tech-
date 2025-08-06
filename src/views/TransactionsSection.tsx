@@ -18,7 +18,6 @@ import SelectTransactionPeriod from "@/components/Transaction/components/selectT
 import { TransactionSubtype, TransactionType } from "@/models/TransactionType";
 import SelectTransactionType from "@/components/Transaction/components/selectTransactionType";
 import EditTransactionForm from "@/components/Transaction/components/editTransactionForm";
-import { useFilteredTransactions } from "@/hooks/useFilteredTransactions";
 import PaginationControls from "@/components/paginationControls";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
@@ -27,6 +26,7 @@ import { useAuth } from "@/context/AuthContext";
 import { AccountService } from "@/services/AccountService";
 import { TransactionService } from "@/services/TransactionService";
 import { Transaction } from "@/models/Transaction";
+import { getDateRange } from "@/lib/utils";
 
 type EditableTransaction = {
   id?: number;
@@ -37,6 +37,14 @@ type EditableTransaction = {
   date: Date;
   document?: string;
 };
+
+type FilterPeriod =
+  | "today"
+  | "yesterday"
+  | "seven-days"
+  | "fifteen-days"
+  | "month"
+  | "year";
 
 export default function TransactionsSection() {
   const { accounts, updateAfterTransaction } = useAuth();
@@ -52,23 +60,17 @@ export default function TransactionsSection() {
   const isMobile = useIsMobile();
   const [isOpenFilterDialog, setIsOpenFilterDialog] = useState(false);
   const [searchTransaction, setSearchTransaction] = useState("");
-  const [selectedPeriod, setSelectedPeriod] = useState("year");
+  const [selectedPeriod, setSelectedPeriod] = useState<FilterPeriod>("year");
   const [selectedSubtype, setSelectedSubtype] = useState<string | undefined>(
     undefined
   );
   const [tempPeriod, setTempPeriod] = useState(selectedPeriod);
   const [tempSubtype, setTempSubtype] = useState(selectedSubtype);
   const transactionsPerPage = 5;
-  const filteredTransactions = useFilteredTransactions({
-    transactions,
-    selectedPeriod,
-    selectedSubtype,
-    search: searchTransaction,
-  });
   const [currentPage, setCurrentPage] = useState(1);
   const [totalTransactions, setTotalTransactions] = useState(0);
 
-  const fetchTransactions = async (page?: number) => {
+  const fetchTransactions = async (page?: number, filters?: object) => {
     if (!accounts || accounts.length === 0) {
       console.log("Nenhuma conta disponível para buscar transações");
       setLoading(false);
@@ -77,14 +79,6 @@ export default function TransactionsSection() {
 
     try {
       setLoading(true);
-
-      const filters: { [key: string]: string | number | boolean } = {
-        period: selectedPeriod,
-        search: searchTransaction,
-      };
-      if (typeof selectedSubtype !== "undefined") {
-        filters.subtype = selectedSubtype;
-      }
 
       const getByIdParams = {
         id: accounts[0].id.toString(),
@@ -197,6 +191,15 @@ export default function TransactionsSection() {
     setSelectedPeriod(tempPeriod);
     setSelectedSubtype(tempSubtype);
     setIsOpenFilterDialog(false);
+
+    const filters = {
+      startDate: getDateRange(tempPeriod).startDate,
+      endDate: getDateRange(tempPeriod).endDate,
+      subtype: tempSubtype,
+      search: searchTransaction,
+    };
+
+    fetchTransactions(1, filters);
   };
 
   const handleClearFilters = () => {
@@ -213,15 +216,6 @@ export default function TransactionsSection() {
       <div className="flex flex-wrap items-center justify-center gap-2 h-50 lg:h-10 lg:min-w-[250px]">
         <p className="text-[16px] font-bold">Carregando transações</p>
         <Loader size={20} color="#47A138" />
-      </div>
-    );
-  }
-
-  if (transactions.length === 0 && !loading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-50 lg:h-10 min-w-[250px]">
-        <h1 className="text-[25px] font-bold">Extrato</h1>
-        <p className="text-[16px]">Nenhuma transação foi realizada</p>
       </div>
     );
   }
@@ -278,12 +272,18 @@ export default function TransactionsSection() {
             />
           </div>
         </div>
-        <TransactionList
-          transactions={filteredTransactions}
-          isEditTransactionItem={isEditTransactionItem}
-          isDeleteTransactionItem={isDeleteTransactionItem}
-          handleSelectTransactionItem={handleSelectTransactionItem}
-        />
+        {transactions.length === 0 && !loading ? (
+          <div className="flex flex-col items-center justify-center h-50 lg:h-10 min-w-[250px]">
+            <p className="text-[16px]">Nenhuma transação foi realizada</p>
+          </div>
+        ) : (
+          <TransactionList
+            transactions={transactions}
+            isEditTransactionItem={isEditTransactionItem}
+            isDeleteTransactionItem={isDeleteTransactionItem}
+            handleSelectTransactionItem={handleSelectTransactionItem}
+          />
+        )}
       </div>
       <EditTransactionDialog
         title={`${isEditTransactionItem ? "Editar" : "Deletar"} transação`}
@@ -329,7 +329,6 @@ export default function TransactionsSection() {
         </div>
       </FilterTransactionsDialog>
 
-      {/* TODO: Implementar paginação */}
       {totalTransactions > 5 && (
         <div className="absolute bottom-0 left-0 w-full bg-white shadow-md">
           <PaginationControls

@@ -8,12 +8,20 @@ import {
 } from "@/components/ui/select";
 import { periods } from "@/constants/period";
 
+type FilterPeriod =
+  | "today"
+  | "yesterday"
+  | "seven-days"
+  | "fifteen-days"
+  | "month"
+  | "year";
+
 const SelectTransactionPeriod = ({
   value,
   onChange
 }: {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: FilterPeriod) => void;
 }) => {
 
   return (

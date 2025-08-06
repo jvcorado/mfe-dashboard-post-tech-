@@ -1,5 +1,5 @@
 // services/AccountService.ts
-import api, { AccountResponse, AccountDetailResponse } from "@/lib/api";
+import api, { AccountResponse, AccountDetailResponse, SearchTransactionsResponse } from "@/lib/api";
 import { Account } from "@/models/Account";
 import { Transaction, TransactionData } from "@/models/Transaction";
 import { PaginationMeta } from "@/types/Pagination";
@@ -67,6 +67,35 @@ export class AccountService {
           Transaction.fromJSON(tx as TransactionData)
         ),
         pagination: data.pagination,
+      };
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response?.status === 404) {
+        throw new Error("Conta não encontrada");
+      }
+      throw new Error("Erro ao buscar conta");
+    }
+  }
+
+  static async getBySearchTerm({
+    id,
+    search,
+  }: {
+    id: string;
+    search: string;
+  }): Promise<{ transactions: Transaction[], total: number }> {
+    try {
+
+      const response = await api.get<SearchTransactionsResponse>(
+        `/accounts/${id}/transactions/search?q=${search}`
+      );
+      const data = response.data;
+
+      return {
+        transactions: data.transactions.map((tx) =>
+          Transaction.fromJSON(tx as TransactionData)
+        ),
+        total: data.total,
       };
     } catch (error) {
       const axiosError = error as AxiosError;
