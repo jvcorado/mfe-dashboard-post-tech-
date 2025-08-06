@@ -35,6 +35,7 @@ type EditableTransaction = {
   type: TransactionType;
   subtype: TransactionSubtype;
   date: Date;
+  document?: string;
 };
 
 export default function TransactionsSection() {
@@ -67,72 +68,65 @@ export default function TransactionsSection() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalTransactions, setTotalTransactions] = useState(0);
 
-  // TODO: Implementar refresh para atualizar transações
-  const refresh = async () => {
-    // try {
-    //   setLoading(true);
-    //   // Verificar se accounts existe e tem pelo menos um elemento
-    //   if (!accounts || accounts.length === 0) {
-    //     console.log("Nenhuma conta disponível para buscar transações");
-    //     setTransactions([]);
-    //     setTotalTransactions(0);
-    //     return;
-    //   }
-    //   const { transactions: accountTransactions, total } =
-    //     await AccountService.getById(accounts[0].id, page, transactionsPerPage);
-    //   console.log("Transações obtidas:", accountTransactions);
-    //   setTransactions(accountTransactions);
-    //   setTotalTransactions(total);
-    // } catch (error) {
-    //   console.error("Erro ao buscar transações:", error);
-    //   setTransactions([]);
-    //   setTotalTransactions(0);
-    // } finally {
-    //   setLoading(false);
-    // }
+  const fetchTransactions = async (page?: number) => {
+    if (!accounts || accounts.length === 0) {
+      console.log("Nenhuma conta disponível para buscar transações");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const filters: { [key: string]: string | number | boolean } = {
+        period: selectedPeriod,
+        search: searchTransaction,
+      };
+      if (typeof selectedSubtype !== "undefined") {
+        filters.subtype = selectedSubtype;
+      }
+
+      const getByIdParams = {
+        id: accounts[0].id.toString(),
+        page: page || currentPage,
+        perPage: transactionsPerPage,
+        filters,
+      };
+
+      const { transactions: accountTransactions, pagination } =
+        await AccountService.getById({ ...getByIdParams });
+      console.log("Transações obtidas:", accountTransactions);
+      setTotalTransactions(pagination.totalItems || 0);
+      setTransactions(accountTransactions);
+      setCurrentPage(pagination.currentPage || 1);
+    } catch (error) {
+      console.error("Erro ao buscar transações:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const changePage = async (page: number) => {
-    await refresh();
     setCurrentPage(page);
+    await fetchTransactions(page);
   };
 
   useEffect(() => {
-    const fetchTransactions = async () => {
-      // Verificar se accounts existe e tem pelo menos um elemento
-      if (!accounts || accounts.length === 0) {
-        console.log("Nenhuma conta disponível para buscar transações");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        const { transactions: accountTransactions } =
-          await AccountService.getById(accounts[0].id);
-        console.log("Transações obtidas:", accountTransactions);
-        setTotalTransactions(accountTransactions.length);
-        setTransactions(accountTransactions);
-      } catch (error) {
-        console.error("Erro ao buscar transações:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTransactions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accounts]);
 
   const handleSelectTransactionItem = (transaction: Transaction) => {
     setEditableTransaction({
       id: transaction.id,
-      description: transaction.subtype,
+      description: transaction.description,
       amount: transaction.amount,
       type: transaction.type,
       subtype: transaction.subtype,
       date: transaction.created_at
         ? new Date(transaction.created_at)
         : new Date(),
+      document: transaction.document,
     });
 
     setIsSelectingTransactionItem(true);
@@ -141,7 +135,6 @@ export default function TransactionsSection() {
   // TODO: Verificar se é necessário atualizar essa função depois de atualizar a função de update
   const handleConfirmEditTransaction = async () => {
     if (editableTransaction && editableTransaction.id) {
-
       if (!accounts || accounts.length === 0) {
         console.error("Nenhuma conta disponível para atualizar transação");
         return;
@@ -152,7 +145,9 @@ export default function TransactionsSection() {
           editableTransaction.id,
           editableTransaction.type,
           editableTransaction.subtype,
-          editableTransaction.amount
+          editableTransaction.amount,
+          editableTransaction.description,
+          editableTransaction.document
         );
 
         // Atualizar dados após transação

@@ -2,10 +2,11 @@ import { TransactionSubtype, TransactionType } from "./TransactionType";
 
 export interface TransactionData {
   id: number;
-  type: "INCOME" | "EXPENSE";
+  type: TransactionType;
   subtype: TransactionSubtype;
   amount: number;
-  document?: File;
+  description: string;
+  document?: string;
   account_id: number;
   created_at: string;
   updated_at: string;
@@ -16,7 +17,8 @@ export class Transaction {
   public type: TransactionType;
   public subtype: TransactionSubtype;
   public amount: number;
-  public document?: File;
+  public description: string;
+  public document?: string;
   public account_id: number;
   public created_at: string;
   public updated_at: string;
@@ -27,6 +29,7 @@ export class Transaction {
       data.type === "INCOME" ? TransactionType.INCOME : TransactionType.EXPENSE;
     this.subtype = data.subtype; // Default subtype, can be extended later
     this.amount = data.amount;
+    this.description = data.description;
     this.document = data.document;
     this.account_id = data.account_id;
     this.created_at = data.created_at;
@@ -43,6 +46,7 @@ export class Transaction {
       type: this.type === TransactionType.INCOME ? TransactionType.INCOME : TransactionType.INCOME,
       subtype: this.subtype,
       amount: this.amount,
+      description: this.description,
       document: this.document,
       account_id: this.account_id,
       created_at: this.created_at,

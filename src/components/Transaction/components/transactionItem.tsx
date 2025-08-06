@@ -10,7 +10,7 @@ type TransactionItemProps = {
   transaction: Transaction;
 };
 export default function TransactionItem({ transaction }: TransactionItemProps) {
-  const { created_at, subtype, type, amount } = transaction;
+  const { created_at, description, type, amount } = transaction;
   const monthName = format(created_at, "MMMM", { locale: ptBR });
   const capitalizedMonth =
     monthName.charAt(0).toUpperCase() + monthName.slice(1);
@@ -22,7 +22,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps) {
         {capitalizedMonth}
       </p>
       <div className="flex flex-row items-center justify-between">
-        <p className="text-black text-base text-start">{subtype}</p>
+        <p className="text-black text-base text-start">{description}</p>
         <p className="text-[#8B8B8B] text-[13px] text-sm">{formattedDate}</p>
       </div>
       <p className="self-start text-black text-base font-bold">{`${
