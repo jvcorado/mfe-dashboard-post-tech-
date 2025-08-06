@@ -131,4 +131,26 @@ export class TransactionService {
       throw new Error("Erro ao deletar transação");
     }
   }
+
+  // Busca transações por subtipo
+  static async searchBySubtype(accountId: number, searchTerm: string): Promise<Transaction[]> {
+    try {
+      // Validar se o termo de busca tem pelo menos 4 caracteres
+      if (searchTerm.length < 4) {
+        throw new Error('O termo de busca deve ter pelo menos 4 caracteres');
+      }
+
+      const response = await api.get(`/accounts/${accountId}/transactions/search?q=${encodeURIComponent(searchTerm)}`);
+      return response.data.transactions.map((transaction: TransactionResponse) => Transaction.fromJSON(transaction));
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message?: string }>;
+      if (axiosError.response?.status === 422) {
+        throw new Error('Termo de busca inválido');
+      }
+      if (axiosError.response?.status === 404) {
+        throw new Error('Conta não encontrada');
+      }
+      throw new Error('Erro ao buscar transações');
+    }
+  }
 }

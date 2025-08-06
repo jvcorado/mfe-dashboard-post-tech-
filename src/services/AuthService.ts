@@ -124,4 +124,37 @@ export class AuthService {
         }
         return null;
     }
+
+    // Renovar token
+    static async refreshToken(): Promise<string | null> {
+        try {
+            const currentToken = this.getToken();
+            if (!currentToken) {
+                throw new Error('Nenhum token encontrado');
+            }
+
+            const response = await api.post('/refresh', {});
+            const { access_token } = response.data;
+
+            if (access_token) {
+                localStorage.setItem('auth_token', access_token);
+                console.log("✅ Token renovado com sucesso");
+                return access_token;
+            }
+
+            return null;
+        } catch (error) {
+            console.error('Erro ao renovar token:', error);
+            // Se falhar ao renovar, limpar dados
+            this.clearAuthData();
+            return null;
+        }
+    }
+
+    // Limpar dados de autenticação
+    static clearAuthData(): void {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_data');
+        console.log("🧹 Dados de autenticação limpos");
+    }
 }
