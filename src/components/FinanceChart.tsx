@@ -19,7 +19,6 @@ import jsPDF from "jspdf";
 import "svg2pdf.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faChartLine,
   faCalendarAlt,
   faReceipt,
   faRocket,
@@ -58,7 +57,7 @@ export default function FinanceChart() {
       .replace(/\b\w/g, (char) => char.toUpperCase());
   }
 
-  const generateColorByIndex = (index: number, totalItems: number) => {
+  const generateColorByIndex = (index: number) => {
     const palette = [
       "#F1823D",
       "#8F3CFF",
@@ -118,69 +117,70 @@ export default function FinanceChart() {
     return number.replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
-  const getFinancialTip = (actualSpending: number, spendingGoal: number) => {
-    if (
-      !actualSpending ||
-      !spendingGoal ||
-      isNaN(actualSpending) ||
-      isNaN(spendingGoal)
-    ) {
-      return "ℹ️ Para receber dicas personalizadas, preencha sua meta de gastos mensais.";
-    }
+  // const getFinancialTip = (actualSpending: number, spendingGoal: number) => {
+  //   if (
+  //     !actualSpending ||
+  //     !spendingGoal ||
+  //     isNaN(actualSpending) ||
+  //     isNaN(spendingGoal)
+  //   ) {
+  //     return "ℹ️ Para receber dicas personalizadas, preencha sua meta de gastos mensais.";
+  //   }
 
-    const percentage = (actualSpending / spendingGoal) * 100;
+  //   const percentage = (actualSpending / spendingGoal) * 100;
 
-    if (percentage < 80)
-      return "✅ Ótimo trabalho! Seus gastos estão bem controlados. \n💰Que tal investir a diferença ou reforçar sua reserva? 📈";
-    if (percentage < 100)
-      return "⚠️ Atenção! Você está se aproximando da meta. \n👀Reveja gastos com delivery, lazer ou compras. 📊";
-    return "🚨 Alerta! Você ultrapassou a meta. \n⛔Tente evitar gastos não essenciais e reequilibrar o orçamento. 🧮";
-  };
+  //   if (percentage < 80)
+  //     return "✅ Ótimo trabalho! Seus gastos estão bem controlados. \n💰Que tal investir a diferença ou reforçar sua reserva? 📈";
+  //   if (percentage < 100)
+  //     return "⚠️ Atenção! Você está se aproximando da meta. \n👀Reveja gastos com delivery, lazer ou compras. 📊";
+  //   return "🚨 Alerta! Você ultrapassou a meta. \n⛔Tente evitar gastos não essenciais e reequilibrar o orçamento. 🧮";
+  // };
 
-  const getStyleClass = (actualSpending: number, spendingGoal: number) => {
-    if (
-      !actualSpending ||
-      !spendingGoal ||
-      isNaN(actualSpending) ||
-      isNaN(spendingGoal)
-    ) {
-      return {
-        bg: "bg-blue-50",
-        text: "text-blue-800",
-        border: "border-blue-300",
-      };
-    }
+  // const getStyleClass = (actualSpending: number, spendingGoal: number) => {
+  //   if (
+  //     !actualSpending ||
+  //     !spendingGoal ||
+  //     isNaN(actualSpending) ||
+  //     isNaN(spendingGoal)
+  //   ) {
+  //     return {
+  //       bg: "bg-blue-50",
+  //       text: "text-blue-800",
+  //       border: "border-blue-300",
+  //     };
+  //   }
 
-    const percentage = (actualSpending / spendingGoal) * 100;
+  //   const percentage = (actualSpending / spendingGoal) * 100;
 
-    const styles = [
-      {
-        min: 0,
-        max: 50,
-        bg: "bg-green-50",
-        text: "text-green-800",
-        border: "border-green-300",
-      },
-      {
-        min: 50,
-        max: 100,
-        bg: "bg-yellow-50",
-        text: "text-yellow-800",
-        border: "border-yellow-300",
-      },
-      {
-        min: 100,
-        max: Infinity,
-        bg: "bg-red-50",
-        text: "text-red-800",
-        border: "border-red-300",
-      },
-    ];
+  //   const styles = [
+  //     {
+  //       min: 0,
+  //       max: 50,
+  //       bg: "bg-green-50",
+  //       text: "text-green-800",
+  //       border: "border-green-300",
+  //     },
+  //     {
+  //       min: 50,
+  //       max: 100,
+  //       bg: "bg-yellow-50",
+  //       text: "text-yellow-800",
+  //       border: "border-yellow-300",
+  //     },
+  //     {
+  //       min: 100,
+  //       max: Infinity,
+  //       bg: "bg-red-50",
+  //       text: "text-red-800",
+  //       border: "border-red-300",
+  //     },
+  //   ];
 
-    return styles.find(
-      ({ min, max }) => percentage >= min && percentage < max
-    )!;
-  };
+  //   return styles.find(
+  //     ({ min, max }) => percentage >= min && percentage < max
+  //   )!;
+  // };
+  
   function useIsMobile() {
     const [isMobile, setIsMobile] = useState(false);
 
@@ -215,8 +215,7 @@ export default function FinanceChart() {
         chartData.forEach((item, index) => {
           if (!updatedColors[item.name]) {
             updatedColors[item.name] = generateColorByIndex(
-              index,
-              chartData.length
+              index
             );
           }
         });
