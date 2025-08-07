@@ -19,17 +19,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-br">
-      <body className={`${inter}  antialiased`}>
-        <AuthProvider>
-          <div className="min-h-screen bg-gray-100">
-            <Header />
-            <Container className="pt-0">{children}</Container>
-          </div>
+    <AuthProvider>
+      <div className="min-h-screen bg-gray-100">
+        <Container className="pt-0">{children}</Container>
+      </div>
 
-          <Toaster position="top-right" />
-        </AuthProvider>
-      </body>
-    </html>
+      <Toaster position="top-right" />
+    </AuthProvider>
   );
 }

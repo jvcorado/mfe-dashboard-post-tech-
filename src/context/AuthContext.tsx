@@ -231,7 +231,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const safeAccounts = accounts || [];
 
   console.log(
-    "🎯 AuthContext render - loading:",
+    "🎯 AuthContext render Dashboard - loading:",
     loading,
     "isAuthenticated:",
     isAuthenticated,

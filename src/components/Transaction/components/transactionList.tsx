@@ -24,13 +24,14 @@ const TransactionList = ({
       Nenhuma transação encontrada com os filtros selecionados.
     </div>
   ) : (
-    <>
+    <div role="list">
       {transactions.map((transaction: Transaction) => (
-        <div key={transaction.id} className="pr-1">
+        <div key={transaction.id} className="pr-1" role="listitem">
           <div className="flex justify-end">
             {isEditTransactionItem && (
               <ActionButton
                 onClick={() => handleSelectTransactionItem(transaction)}
+                aria-label="Editar transação"
                 content={<Pencil size={14} />}
                 colors="blue"
                 size="sm"
@@ -39,6 +40,7 @@ const TransactionList = ({
             {isDeleteTransactionItem && (
               <ActionButton
                 onClick={() => handleSelectTransactionItem(transaction)}
+                aria-label="Deletar transação"
                 content={<Trash2 size={14} />}
                 colors="blue"
                 size="sm"
@@ -48,7 +50,7 @@ const TransactionList = ({
           <TransactionItem key={transaction.id} transaction={transaction} />
         </div>
       ))}
-    </>
+    </div>
   );
 };
 

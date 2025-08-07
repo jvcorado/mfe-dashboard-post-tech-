@@ -37,7 +37,7 @@ export default function FinanceChart() {
   const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [monthlyTotal, setMonthlyTotal] = useState<number>(0);
-  const [valor, setValor] = useState("");
+  const [value, setValue] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const { accounts } = useAuth();
   const [data, setData] = useState<ChartItem[]>([]);
@@ -59,9 +59,23 @@ export default function FinanceChart() {
   }
 
   const generateColorByIndex = (index: number, totalItems: number) => {
-    const hue = Math.floor((360 / totalItems) * index);
-    return `hsl(${hue}, 90%, 30%)`;
+    const palette = [
+      "#F1823D",
+      "#8F3CFF",
+      "#2567F9",
+      "#FF3C82",
+      "#F1A23D",
+      "#A16CFF",
+      "#3A73F9",
+      "#FF6C82",
+      "#F18290",
+      "#6BBFFF",
+      "#FFA73D",
+      "#3CDF8F",
+    ];
+    return palette[index % palette.length];
   };
+
   const exportPDF = () => {
     const graficoElement = document.getElementById("grafico");
 
@@ -95,13 +109,13 @@ export default function FinanceChart() {
       });
   };
 
-  const formatValue = (valor: string) => {
+  const formatValue = (value: string) => {
     // Remove tudo que não for número
-    const somenteNum = valor.replace(/\D/g, ".");
+    const onlyNum = value.replace(/\D/g, ".");
 
     // Converte para float com duas casas decimais
-    const numero = (parseFloat(somenteNum) / 100).toFixed(2);
-    return numero.replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    const number = (parseFloat(onlyNum) / 100).toFixed(2);
+    return number.replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
   const getFinancialTip = (actualSpending: number, spendingGoal: number) => {
@@ -191,9 +205,7 @@ export default function FinanceChart() {
         await activeAccount.getExpensesByCategoryForMonth(month, year);
 
       const chartData = categories.map((transaction) => ({
-        name: formatEnumName(
-          transaction.subtype.split(":")[1]?.trim() || "No description"
-        ),
+        name: formatEnumName(transaction.description || "No description"),
         value: transaction.amount,
         type: transaction.type,
       }));
@@ -226,26 +238,19 @@ export default function FinanceChart() {
       <div className="w-full max-w-[100%] flex flex-col justify-center">
         <h1
           className="w-full sm:text-2xl md:text-2xl lg:text-2xl font-extrabold tracking-tight px-4 py-6
-          text-slate-800 bg-gradient-to-r from-blue-100 via-white to-blue-100 shadow-lg rounded-lg
+          text-slate-800 from-blue-100 via-white to-blue-100 shadow-lg rounded-lg
           flex justify-center items-center text-center"
         >
-          <FontAwesomeIcon
-            icon={faChartLine}
-            className="text-blue-600 mr-4 animate-bounce"
-          />
           Painel Financeiro
         </h1>
         <div className="grid z-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
           <div className="flex flex-col justify-between h-full bg-white border border-gray-200 p-4 rounded-xl shadow-md text-center transition duration-300 hover:scale-105 hover:shadow-lg">
             <label className="text-gray-500 text-2xl font-semibold whitespace-nowrap flex justify-center items-center gap-2">
-              <FontAwesomeIcon
-                icon={faCalendarAlt}
-                className="text-3xl text-[#004D61]"
-              />
-              mês e o ano
+              <FontAwesomeIcon icon={faCalendarAlt} />
+              Mês e o ano
             </label>
 
-            <div className="relative text-2xl sm:text-3xl">
+            <div className="relative text-2xl sm:text-2xl">
               <DatePicker
                 selected={selectedDate}
                 onChange={(date: Date | null) => {
@@ -268,13 +273,10 @@ export default function FinanceChart() {
 
           <div className="flex flex-col justify-between h-full bg-white border border-gray-200 p-4 rounded-xl shadow-md text-center transition duration-300 hover:scale-105 hover:shadow-lg">
             <h2 className="text-gray-500 text-2xl font-semibold whitespace-nowrap flex justify-center items-center gap-2">
-              <FontAwesomeIcon
-                icon={faReceipt}
-                className="text-red-800 text-3xl"
-              />
+              <FontAwesomeIcon icon={faReceipt} />
               Gastos do mês
             </h2>
-            <p className="text-3xl font-bold text-red-500 w-full min-h-[48px] px-4">
+            <p className="text-2xl font-bold text-red-500 w-full min-h-[48px] px-4">
               {monthlyTotal !== null
                 ? formatCurrencyBRL(monthlyTotal)
                 : "Carregando..."}
@@ -283,26 +285,23 @@ export default function FinanceChart() {
 
           <div className="flex flex-col justify-between h-full bg-white border border-gray-200 p-4 rounded-xl shadow-md text-center transition duration-300 hover:scale-105 hover:shadow-lg">
             <label
-              htmlFor="valor"
+              htmlFor="value"
               className="text-gray-500 text-2xl font-semibold whitespace-nowrap flex justify-center items-center gap-2"
             >
-              <FontAwesomeIcon
-                icon={faRocket}
-                className="text-blue-600 text-3xl"
-              />
+              <FontAwesomeIcon icon={faRocket} />
               Meta mensal
             </label>
             <input
               type="text"
-              id="valor"
-              name="valor"
+              id="value"
+              name="value"
               required
-              placeholder="Digite sua meta de economia"
+              placeholder="Digite sua meta"
               className="w-full min-h-[48px] text-2xl bg-white text-[#444444] text-center rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-[#004D61] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              value={valor ? `R$ ${formatValue(valor)}` : ""}
+              value={value ? `R$ ${formatValue(value)}` : ""}
               onChange={(e) => {
                 const rawValue = e.target.value.replace(/\D/g, "");
-                setValor(rawValue);
+                setValue(rawValue);
               }}
             />
           </div>
@@ -310,10 +309,10 @@ export default function FinanceChart() {
 
         <div
           aria-label={`Gráfico de pizza mostrando a distribuição financeira de ${month}/${year}`}
-          className="flex flex-col min-h-screen bg-gray-50 p-4"
+          className="flex flex-col p-4 rounded-lg shadow-lg m-4 bg-[#004D61]"
         >
-          <div id="grafico" ref={chartRef}>
-            <h2 className="text-3xl font-bold mb-2 text-center mt-5">
+          <div id="grafico" ref={chartRef} className="bg-[#004D61]">
+            <h2 className="text-3xl font-bold mb-2 text-center mt-5 text-white">
               Distribuição Financeira
             </h2>
             {/* Texto acessível para leitores de tela */}
@@ -325,7 +324,7 @@ export default function FinanceChart() {
                 .join(", ")}
               . Total do mês: R$ {monthlyTotal.toFixed(2)}.
             </p>
-            <div
+            {/* <div
               className="mt-6 px-4 sm:px-6 py-5 rounded-2xl shadow-md border-l-4 border-blue-500 bg-blue-50
              max-w-full sm:max-w-2xl mx-auto break-words"
             >
@@ -365,7 +364,7 @@ export default function FinanceChart() {
                   );
                 })()
               )}
-            </div>
+            </div> */}
 
             <div className="h-[70vh] flex items-center justify-center">
               {data.length === 0 ? ( // ⬅️ Adição
@@ -388,26 +387,26 @@ export default function FinanceChart() {
                       isAnimationActive={true}
                       animationDuration={1200}
                       animationEasing="ease-in-out"
-                      className="text-[10px] sm:text-[14px] font-semibold"
+                      className="text-[10px] text-white sm:text-[14px] font-semibold"
                       label={({ name, value }) =>
                         isMobile
                           ? `${(
                               ((value ?? totalAmount) / totalAmount) *
                               100
                             ).toFixed(0)}%`
-                          : `${name.split(":")[1]?.trim() ?? name}: ${(
+                          : `${name}: ${(
                               ((value ?? totalAmount) / totalAmount) *
                               100
                             ).toFixed(0)}%`
                       }
                       labelLine={false}
+                      color="#ffffff"
                     >
                       {data.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
                           fill={categoryColors[entry.name] ?? "#ccc"}
-                          stroke="#fff"
-                          strokeWidth={2}
+                          stroke="none"
                         />
                       ))}
                     </Pie>
@@ -443,7 +442,9 @@ export default function FinanceChart() {
                                   className="inline-block w-4 h-4 rounded-full"
                                   style={{ backgroundColor: entry.color }}
                                 ></span>
-                                <span className="truncate">{entry.value}</span>
+                                <span className="truncate text-white">
+                                  {entry.value}
+                                </span>
                               </li>
                             ))}
                           </ul>
