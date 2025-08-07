@@ -133,11 +133,19 @@ export default function TransactionsSection() {
           setLoading(false);
         }
       } else {
-        fetchTransactions(1, {
-          startDate: getDateRange(selectedPeriod!).startDate,
-          endDate: getDateRange(selectedPeriod!).endDate,
-          subtype: selectedSubtype,
-        });
+        const filters: Record<string, string> = {};
+
+        if (selectedPeriod && selectedPeriod !== "year") {
+          const { startDate, endDate } = getDateRange(selectedPeriod);
+          filters.startDate = startDate;
+          filters.endDate = endDate;
+        }
+
+        if (selectedSubtype !== undefined && selectedSubtype !== null) {
+          filters.subtype = selectedSubtype;
+        }
+  
+        fetchTransactions(1, filters);
       }
     };
 
