@@ -213,7 +213,7 @@ export default function TransactionsSection() {
 
   if (transactions.length === 0 && loading) {
     return (
-      <div className="flex flex-wrap items-center justify-center gap-2 h-50 lg:h-10 lg:min-w-[250px]">
+      <div className="flex flex-wrap items-center justify-center gap-2 h-50 lg:h-10 lg:min-w-[250px]" aria-live="polite">
         <p className="text-[16px] font-bold">Carregando transações</p>
         <Loader size={20} color="#47A138" />
       </div>
@@ -226,8 +226,10 @@ export default function TransactionsSection() {
       flex flex-col items-center rounded-md pt-10 pb-10 justify-between md:min-w-[245px]"
     >
       <div className="flex flex-col text-center md:text-left gap-[24px] overflow-y-auto scrollbar-hidden">
+        <label htmlFor="searchTransaction" className="sr-only">Buscar transação</label>
         <div className="flex relative w-full gap-2">
           <Input
+          id="searchTransaction"
             icon={<Search size={18} />}
             placeholder="Buscar transação..."
             value={searchTransaction}
@@ -253,6 +255,7 @@ export default function TransactionsSection() {
               content={
                 isEditTransactionItem ? <X size={22} /> : <Pencil size={22} />
               }
+              aria-label={isEditTransactionItem ? "Cancelar edição" : "Editar transação"}
               colors="blue"
               size="default"
             />
@@ -267,6 +270,7 @@ export default function TransactionsSection() {
               content={
                 isDeleteTransactionItem ? <X size={22} /> : <Trash2 size={22} />
               }
+              aria-label={isDeleteTransactionItem ? "Cancelar exclusão" : "Deletar transação"}
               colors="blue"
               size="default"
             />

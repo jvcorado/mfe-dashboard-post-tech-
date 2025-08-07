@@ -32,6 +32,7 @@ const PaginationControls = ({
               currentPage === 1 && "pointer-events-none opacity-50"
             )}
             onClick={() => onPageChange(currentPage - 1)}
+            aria-label={`Página ${currentPage - 1}`}
           />
         </PaginationItem>
 
@@ -53,6 +54,7 @@ const PaginationControls = ({
               currentPage === totalPages && "pointer-events-none opacity-50"
             )}
             onClick={() => onPageChange(currentPage + 1)}
+            aria-label={`Página ${currentPage + 1}`}
           />
         </PaginationItem>
       </PaginationContent>

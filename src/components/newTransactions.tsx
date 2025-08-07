@@ -137,7 +137,7 @@ export default function NewTransactions() {
         subtype,
         typeSelected?.label as string,
         parsedAmount,
-        documentFile?.name,
+        documentFile?.name
       );
 
       await updateAfterTransaction();
@@ -210,7 +210,10 @@ export default function NewTransactions() {
           >
             {() => (
               <div className="relative">
-                <Listbox.Button className="w-full max-w-[355px] z-10 min-h-[48px] border border-[#004D61] rounded-lg bg-white text-[#444444] px-4 py-2 text-base flex items-center justify-between">
+                <Listbox.Button
+                  aria-label="Selecionar tipo de transação"
+                  className="w-full max-w-[355px] z-10 min-h-[48px] border border-[#004D61] rounded-lg bg-white text-[#444444] px-4 py-2 text-base flex items-center justify-between"
+                >
                   <span className="truncate">
                     {typeSelected
                       ? typeSelected.label
@@ -225,9 +228,10 @@ export default function NewTransactions() {
                       key={`${type.label}-${type.subtype}`}
                       value={type}
                       className={({ active }) =>
-                        `cursor-pointer px-4 py-2 ${active
-                          ? "bg-[#E4EDE3] text-black rounded-lg"
-                          : "text-[#444444]"
+                        `cursor-pointer px-4 py-2 ${
+                          active
+                            ? "bg-[#E4EDE3] text-black rounded-lg"
+                            : "text-[#444444]"
                         }`
                       }
                     >
@@ -246,13 +250,13 @@ export default function NewTransactions() {
         </div>
 
         <div className="relative pt-4 ml-4 sm:ml-8 md:ml-16 w-full max-w-[250px]">
-          <label htmlFor="value" className="block font-medium mb-1 text-base">
+          <label htmlFor="valor" className="block font-medium mb-1 text-base">
             Valor:
           </label>
           <Input
             type="text"
-            id="value"
-            name="value"
+            id="valor"
+            name="valor"
             required
             placeholder="R$ 0,00"
             inputMode="numeric"
@@ -294,7 +298,12 @@ export default function NewTransactions() {
         </div>
 
         <div className="pt-8 ml-4 sm:ml-8 md:ml-16 w-full flex flex-col justify-start z-8">
-          <Button type="submit" disabled={disabledButton} colors="dark-blue">
+          <Button
+            type="submit"
+            disabled={disabledButton}
+            colors="dark-blue"
+            aria-busy={loading}
+          >
             {loading ? (
               <LoaderCircle className="animate-spin" />
             ) : (
@@ -310,7 +319,7 @@ export default function NewTransactions() {
       <div className="bottom-4 right-0 max-w-full lg:hidden z-10 items-center">
         <Transacaobg3 className="w-[100px] h-[100px] sm:w-[120px] right-0 sm:h-[120px] items-center object-contain z-10 lg:hidden" />
       </div>
-      <Snackbar {...messageSnackbar} />
+      <Snackbar aria-live="assertive" {...messageSnackbar} />
     </div>
   );
 }

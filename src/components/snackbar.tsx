@@ -22,6 +22,7 @@ export default function Snackbar({
   actionText = "Fechar",
   direction = "down",
   duration = 3000,
+  ...rest
 }: SnackbarProps) {
   const colorsMap = {
     info: "bg-blue-500",
@@ -35,6 +36,7 @@ export default function Snackbar({
       <Toast.Provider swipeDirection={direction} duration={duration}>
         {show && (
           <Toast.Root
+            {...rest}
             defaultOpen
             onOpenChange={setShow}
             duration={duration}

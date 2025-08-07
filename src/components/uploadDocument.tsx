@@ -34,7 +34,7 @@ export default function UploadDocument({
       className={`max-w-[250px] p-4 border-2 border-dashed rounded-lg cursor-pointer transition 
         ${isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-400 bg-white"}`}
     >
-      <input {...getInputProps()} />
+      <input aria-label="Selecionar comprovante" {...getInputProps()} />
       <p className="text-sm text-gray-700">
         {isDragActive
           ? "Solte o arquivo aqui..."
