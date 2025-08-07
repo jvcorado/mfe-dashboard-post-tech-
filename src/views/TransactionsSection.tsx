@@ -9,6 +9,7 @@ import {
   Search,
   SlidersHorizontal,
 } from "lucide-react";
+import debounce from "lodash/debounce";
 
 import Input from "@/components/input";
 import TransactionList from "@/components/Transaction/components/transactionList";
@@ -60,7 +61,9 @@ export default function TransactionsSection() {
   const isMobile = useIsMobile();
   const [isOpenFilterDialog, setIsOpenFilterDialog] = useState(false);
   const [searchTransaction, setSearchTransaction] = useState("");
-  const [selectedPeriod, setSelectedPeriod] = useState<FilterPeriod>("year");
+  const [selectedPeriod, setSelectedPeriod] = useState<FilterPeriod | null>(
+    "year"
+  );
   const [selectedSubtype, setSelectedSubtype] = useState<string | undefined>(
     undefined
   );
@@ -110,6 +113,43 @@ export default function TransactionsSection() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accounts]);
 
+  useEffect(() => {
+    const searchAccounts = async () => {
+      if (!accounts || accounts.length === 0) return;
+
+      if (searchTransaction.length >= 4) {
+        try {
+          setLoading(true);
+          const result = await AccountService.getBySearchTerm({
+            id: accounts[0].id.toString(),
+            search: searchTransaction,
+          });
+          setTransactions(result.transactions || []);
+          setTotalTransactions(result.transactions?.length || 0);
+          setCurrentPage(1);
+        } catch (error) {
+          console.error("Erro ao buscar por termo:", error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        fetchTransactions(1, {
+          startDate: getDateRange(selectedPeriod!).startDate,
+          endDate: getDateRange(selectedPeriod!).endDate,
+          subtype: selectedSubtype,
+        });
+      }
+    };
+
+    const debouncedSearch = debounce(searchAccounts, 400);
+    debouncedSearch();
+
+    return () => {
+      debouncedSearch.cancel?.();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTransaction]);
+
   const handleSelectTransactionItem = (transaction: Transaction) => {
     setEditableTransaction({
       id: transaction.id,
@@ -126,7 +166,6 @@ export default function TransactionsSection() {
     setIsSelectingTransactionItem(true);
   };
 
-  // TODO: Verificar se é necessário atualizar essa função depois de atualizar a função de update
   const handleConfirmEditTransaction = async () => {
     if (editableTransaction && editableTransaction.id) {
       if (!accounts || accounts.length === 0) {
@@ -144,7 +183,6 @@ export default function TransactionsSection() {
           editableTransaction.document
         );
 
-        // Atualizar dados após transação
         await updateAfterTransaction();
 
         setIsSelectingTransactionItem(false);
@@ -158,7 +196,6 @@ export default function TransactionsSection() {
 
   const handleConfirmDeleteTransaction = async () => {
     if (editableTransaction && editableTransaction.id) {
-      // Verificar se accounts existe e tem pelo menos um elemento
       if (!accounts || accounts.length === 0) {
         console.error("Nenhuma conta disponível para deletar transação");
         return;
@@ -167,7 +204,6 @@ export default function TransactionsSection() {
       try {
         await TransactionService.delete(editableTransaction.id);
 
-        // Atualizar dados após transação
         await updateAfterTransaction();
 
         setIsSelectingTransactionItem(false);
@@ -192,28 +228,37 @@ export default function TransactionsSection() {
     setSelectedSubtype(tempSubtype);
     setIsOpenFilterDialog(false);
 
-    const filters = {
-      startDate: getDateRange(tempPeriod).startDate,
-      endDate: getDateRange(tempPeriod).endDate,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const filters: Record<string, any> = {
       subtype: tempSubtype,
       search: searchTransaction,
     };
+
+    if (tempPeriod !== null && tempPeriod !== undefined) {
+      filters.startDate = getDateRange(tempPeriod).startDate;
+      filters.endDate = getDateRange(tempPeriod).endDate;
+    }
 
     fetchTransactions(1, filters);
   };
 
   const handleClearFilters = () => {
-    setTempPeriod("year");
+    setTempPeriod(null);
     setTempSubtype(undefined);
 
-    setSelectedPeriod("year");
+    setSelectedPeriod(null);
     setSelectedSubtype(undefined);
     setSearchTransaction("");
+
+    fetchTransactions();
   };
 
   if (transactions.length === 0 && loading) {
     return (
-      <div className="flex flex-wrap items-center justify-center gap-2 h-50 lg:h-10 lg:min-w-[250px]" aria-live="polite">
+      <div
+        className="flex flex-wrap items-center justify-center gap-2 h-50 lg:h-10 lg:min-w-[250px]"
+        aria-live="polite"
+      >
         <p className="text-[16px] font-bold">Carregando transações</p>
         <Loader size={20} color="#47A138" />
       </div>
@@ -226,10 +271,12 @@ export default function TransactionsSection() {
       flex flex-col items-center rounded-md pt-10 pb-10 justify-between md:min-w-[245px]"
     >
       <div className="flex flex-col text-center md:text-left gap-[24px] overflow-y-auto scrollbar-hidden">
-        <label htmlFor="searchTransaction" className="sr-only">Buscar transação</label>
+        <label htmlFor="searchTransaction" className="sr-only">
+          Buscar transação
+        </label>
         <div className="flex relative w-full gap-2">
           <Input
-          id="searchTransaction"
+            id="searchTransaction"
             icon={<Search size={18} />}
             placeholder="Buscar transação..."
             value={searchTransaction}
@@ -255,7 +302,9 @@ export default function TransactionsSection() {
               content={
                 isEditTransactionItem ? <X size={22} /> : <Pencil size={22} />
               }
-              aria-label={isEditTransactionItem ? "Cancelar edição" : "Editar transação"}
+              aria-label={
+                isEditTransactionItem ? "Cancelar edição" : "Editar transação"
+              }
               colors="blue"
               size="default"
             />
@@ -270,7 +319,11 @@ export default function TransactionsSection() {
               content={
                 isDeleteTransactionItem ? <X size={22} /> : <Trash2 size={22} />
               }
-              aria-label={isDeleteTransactionItem ? "Cancelar exclusão" : "Deletar transação"}
+              aria-label={
+                isDeleteTransactionItem
+                  ? "Cancelar exclusão"
+                  : "Deletar transação"
+              }
               colors="blue"
               size="default"
             />
@@ -323,7 +376,7 @@ export default function TransactionsSection() {
       >
         <div className="flex flex-col gap-4">
           <SelectTransactionPeriod
-            value={tempPeriod}
+            value={tempPeriod!}
             onChange={setTempPeriod}
           />
           <SelectTransactionType
